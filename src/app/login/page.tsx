@@ -409,7 +409,7 @@ export default function LoginPage() {
 
                   <p className="text-text-grey text-sm">
 
-                    Don't have an account?{" "}
+                    Don&apos;t have an account?{" "}
 
                     <Link
                       href="/patient-register"
