@@ -389,72 +389,82 @@ margin-bottom:8px;
 
 
 
+/* =========================
+   Signup Input Fix
+========================= */
 
-.input-field{
 
+.input-field {
 
 width:100%;
 
-
 height:46px;
 
-
-padding-left:14px;
-
+padding-left:44px;
 
 padding-right:14px;
 
-
 background:white;
-
 
 border:1px solid var(--color-border);
 
-
 border-radius:12px;
-
 
 outline:none;
 
-
-transition:.2s ease;
-
+transition:all .2s ease;
 
 color:var(--color-text-dark);
 
+font-size:14px;
 
 }
 
 
 
-.input-field:focus{
-
+.input-field:focus {
 
 border-color:var(--color-primary);
-
 
 box-shadow:
 0 0 0 3px var(--color-primary-light);
 
-
 }
 
 
 
 
-.input-icon{
 
+.input-icon {
 
-width:17px;
+position:absolute;
 
-height:17px;
+left:14px;
+
+top:50%;
+
+transform:translateY(-50%);
+
+width:18px;
+
+height:18px;
 
 color:var(--color-primary);
 
+z-index:5;
+
+pointer-events:none;
 
 }
 
 
+
+
+.relative {
+
+position:relative;
+
+}
 
 
 
