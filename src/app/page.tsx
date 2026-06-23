@@ -430,7 +430,7 @@ export default function Home() {
 
               <Image
 
-                src="/assets/hero-healthcare.png"
+                src="/assets/images/hero.png"
 
                 width={600}
 
