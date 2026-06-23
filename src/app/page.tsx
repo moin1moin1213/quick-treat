@@ -3,441 +3,463 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+export default function Home() {
 
-export default function Home(){
+  return (
 
+    <main className="bg-white text-gray-800">
 
-return (
 
-<main className="bg-white text-gray-800">
+      {/* ================= NAVBAR ================= */}
 
+      <header className="
+      sticky
+      top-0
+      z-50
+      bg-white/90
+      backdrop-blur
+      border-b
+      ">
 
+        <div className="
+        max-w-7xl
+        mx-auto
+        px-4
+        sm:px-6
+        lg:px-8
+        py-4
+        flex
+        items-center
+        justify-between
+        ">
 
-{/* ================= NAVBAR ================= */}
 
+          {/* LOGO */}
 
-<header
-className="
-sticky
-top-0
-z-50
-bg-white/90
-backdrop-blur
-border-b
-"
->
+          <Link
+            href="/"
+            className="
+            flex
+            items-center
+            gap-3
+            "
+          >
 
+            <Image
+              src="/assets/icons/logo.png"
+              width={45}
+              height={45}
+              alt="Quick Treat"
+            />
 
-<div
-className="
-max-w-7xl
-mx-auto
-px-4
-sm:px-6
-py-4
-flex
-items-center
-justify-between
-"
->
 
+            <span className="
+            text-xl
+            font-bold
+            text-teal-700
+            ">
+              Quick Treat
+            </span>
 
-<Link
-href="/"
-className="
-flex
-items-center
-gap-3
-"
->
 
+          </Link>
 
-<Image
 
-src="/assets/icons/logo.png"
 
-width={45}
 
-height={45}
+          {/* DESKTOP MENU */}
 
-alt="Quick Treat"
+          <nav className="
+          hidden
+          md:flex
+          gap-8
+          text-sm
+          font-medium
+          ">
 
-/>
 
+            <a href="#">
+              Home
+            </a>
 
-<span
-className="
-text-xl
-font-bold
-text-teal-700
-"
->
 
-Quick Treat
+            <a href="#features">
+              Features
+            </a>
 
-</span>
 
+            <a href="#how">
+              How It Works
+            </a>
 
-</Link>
 
+            <a href="#contact">
+              Contact
+            </a>
 
 
+          </nav>
 
 
-<nav
-className="
-hidden
-md:flex
-gap-8
-text-sm
-font-medium
-"
->
 
 
-<Link href="/">
-Home
-</Link>
 
+          {/* ACTION BUTTON */}
 
-<a href="#features">
-Features
-</a>
+          <div className="
+          flex
+          gap-2
+          sm:gap-3
+          ">
 
 
-<a href="#how">
-How It Works
-</a>
+            <Link
+              href="/login"
+              className="
+              px-4
+              sm:px-6
+              py-2
+              border
+              border-teal-600
+              text-teal-700
+              rounded-lg
+              text-sm
+              "
+            >
 
+              Login
 
-<a href="#contact">
-Contact
-</a>
+            </Link>
 
 
-</nav>
 
 
+            <Link
+              href="/patient-register"
+              className="
+              px-4
+              sm:px-6
+              py-2
+              bg-teal-600
+              text-white
+              rounded-lg
+              text-sm
+              "
+            >
 
+              Get Started
 
+            </Link>
 
 
-<div
-className="
-flex
-gap-3
-"
->
 
+          </div>
 
-<Link
 
-href="/login"
+        </div>
 
-className="
-px-5
-py-2
-border
-border-teal-600
-text-teal-700
-rounded-lg
-"
 
->
+      </header>
 
-Login
 
-</Link>
 
 
 
 
-<Link
 
-href="/patient-register"
+      {/* ================= HERO ================= */}
 
-className="
-px-5
-py-2
-bg-teal-600
-text-white
-rounded-lg
-"
 
->
+      <section className="
+      bg-linear-to-b
+      from-teal-50
+      to-white
+      ">
 
-Get Started
 
-</Link>
+        <div className="
+        max-w-7xl
+        mx-auto
+        px-4
+        sm:px-6
+        lg:px-8
+        py-16
+        md:py-24
+        grid
+        md:grid-cols-2
+        gap-12
+        items-center
+        ">
 
 
 
-</div>
+          {/* LEFT CONTENT */}
 
 
+          <div>
 
 
-</div>
+            <span className="
+            inline-block
+            bg-teal-100
+            text-teal-700
+            px-4
+            py-2
+            rounded-full
+            text-sm
+            ">
 
+              #1 Healthcare Management Platform
 
-</header>
+            </span>
 
 
 
 
 
+            <h1 className="
+            text-4xl
+            md:text-5xl
+            font-bold
+            mt-6
+            leading-tight
+            ">
 
 
-{/* ================= HERO ================= */}
+              Healthcare
 
+              <span className="
+              text-teal-600
+              ">
 
+                {" "}Without Waiting.
 
-<section
-className="
-bg-gradient-to-b
-from-teal-50
-to-white
-"
->
+              </span>
 
 
-<div
+            </h1>
 
-className="
-max-w-7xl
-mx-auto
-px-4
-sm:px-6
-py-16
-md:py-24
-grid
-md:grid-cols-2
-gap-12
-items-center
-"
 
->
 
 
 
+            <p className="
+            mt-6
+            text-gray-600
+            text-lg
+            ">
 
 
-<div>
+              Book appointments, manage queues,
+              track patients and grow your healthcare
+              service with one powerful platform.
 
 
+            </p>
 
-<span
 
-className="
-inline-block
-bg-teal-100
-text-teal-700
-px-4
-py-2
-rounded-full
-text-sm
-"
 
->
 
-#1 Healthcare Management Platform
 
-</span>
 
 
+            <div className="
+            flex
+            flex-col
+            sm:flex-row
+            gap-4
+            mt-8
+            ">
 
 
 
+              <Link
 
-<h1
+                href="/patient-register"
 
-className="
-text-4xl
-md:text-6xl
-font-bold
-mt-6
-leading-tight
-"
+                className="
+                bg-teal-600
+                text-white
+                px-8
+                py-4
+                rounded-xl
+                text-center
+                "
 
->
+              >
 
+                Get Started Free →
 
-Healthcare
+              </Link>
 
 
-<span
-className="
-text-teal-600
-"
->
 
- Without Waiting.
 
-</span>
 
+              <button
 
-</h1>
+                className="
+                border
+                border-teal-600
+                px-8
+                py-4
+                rounded-xl
+                text-teal-700
+                "
 
+              >
 
+                ▶ Watch Demo
 
+              </button>
 
 
 
-<p
+            </div>
 
-className="
-mt-6
-text-gray-600
-text-lg
-leading-relaxed
-"
 
->
 
-Book appointments, manage queues,
-track patients and grow your practice.
-Everything in one powerful platform.
 
-</p>
 
 
 
+            {/* STATS */}
 
 
+            <div className="
+            grid
+            grid-cols-3
+            gap-5
+            mt-10
+            text-sm
+            ">
 
 
+              <div>
 
-<div
+                <h3 className="
+                text-xl
+                font-bold
+                text-teal-700
+                ">
+                  50+
+                </h3>
 
-className="
-flex
-flex-col
-sm:flex-row
-gap-4
-mt-8
-"
 
->
+                <p>
+                  Doctors
+                </p>
 
 
-<Link
+              </div>
 
 
-href="/patient-register"
 
 
-className="
-bg-teal-600
-text-white
-px-8
-py-4
-rounded-xl
-font-medium
-text-center
-"
+              <div>
 
->
+                <h3 className="
+                text-xl
+                font-bold
+                text-teal-700
+                ">
+                  100+
+                </h3>
 
-Get Started Free →
 
-</Link>
+                <p>
+                  Clinics
+                </p>
 
 
+              </div>
 
 
 
-<button
 
 
-className="
-border
-border-teal-600
-px-8
-py-4
-rounded-xl
-text-teal-700
-"
+              <div>
 
->
+                <h3 className="
+                text-xl
+                font-bold
+                text-teal-700
+                ">
+                  10K+
+                </h3>
 
-▶ Watch Demo
 
-</button>
+                <p>
+                  Patients
+                </p>
 
 
+              </div>
 
 
-</div>
 
+            </div>
 
 
 
+          </div>
 
 
 
-<div
 
-className="
-flex
-gap-8
-mt-10
-text-sm
-"
 
->
 
 
-<div>
 
-<b>
-50+
-</b>
 
-<p>
-Doctors
-</p>
+          {/* HERO IMAGE */}
 
-</div>
 
+          <div className="
+          flex
+          justify-center
+          ">
 
 
-<div>
+            <div className="
+            relative
+            w-full
+            max-w-lg
+            ">
 
-<b>
-100+
-</b>
 
-<p>
-Clinics
-</p>
+              <Image
 
-</div>
+                src="/assets/hero-healthcare.png"
 
+                width={600}
 
+                height={600}
 
+                alt="Healthcare Dashboard"
 
-<div>
+                className="
+                w-full
+                h-auto
+                object-contain
+                "
 
-<b>
-10,000+
-</b>
+              />
 
-<p>
-Patients
-</p>
 
-</div>
+            </div>
 
 
+          </div>
 
-</div>
 
 
 
+        </div>
 
 
+      </section>
 
-</div>
 
 
 
@@ -446,999 +468,902 @@ Patients
 
 
 
+      {/* ================= USER TYPES ================= */}
 
-{/* HERO IMAGE */}
 
+      <section className="
+      py-20
+      ">
 
 
-<div
+        <div className="
+        max-w-7xl
+        mx-auto
+        px-4
+        sm:px-6
+        lg:px-8
+        ">
 
-className="
-flex
-justify-center
-"
 
->
+          <h2 className="
+          text-3xl
+          md:text-4xl
+          font-bold
+          text-center
+          ">
 
 
-<div
+            Who Uses
 
-className="
-bg-white
-rounded-3xl
-shadow-xl
-p-4
-w-full
-max-w-xl
-"
+            <span className="
+            text-teal-600
+            ">
 
->
+              {" "}Quick Treat?
 
+            </span>
 
-<Image
 
-src="/assets/hero-dashboard.png"
+          </h2>
 
-width={650}
 
-height={550}
 
-alt="Quick Treat Dashboard"
 
-className="
-w-full
-h-auto
-rounded-2xl
-"
+          <p className="
+          text-center
+          text-gray-500
+          mt-3
+          ">
 
-priority
+            Designed for patients, doctors and hospitals
 
-/>
+          </p>
 
 
-</div>
 
 
-</div>
 
+          <div className="
+          grid
+          md:grid-cols-3
+          gap-8
+          mt-12
+          ">
 
 
+            {/* PATIENT CARD */}
 
 
+            <div className="
+            border
+            rounded-2xl
+            p-8
+            hover:shadow-lg
+            transition
+            ">
 
 
-</div>
+              <h3 className="
+              text-xl
+              font-bold
+              ">
 
+                👤 For Patients
 
-</section>
+              </h3>
 
 
 
+              <ul className="
+              mt-5
+              space-y-3
+              text-gray-600
+              ">
 
+                <li>
+                  ✓ Find trusted doctors
+                </li>
 
+                <li>
+                  ✓ Book appointments
+                </li>
 
+                <li>
+                  ✓ Track queue live
+                </li>
 
+                <li>
+                  ✓ Digital prescriptions
+                </li>
 
 
-{/* ================= USER TYPES ================= */}
+              </ul>
 
 
 
-<section
+              <Link
 
-className="
-py-20
-"
+                href="/patient-register"
 
->
+                className="
+                block
+                mt-6
+                bg-teal-600
+                text-white
+                text-center
+                py-3
+                rounded-lg
+                "
 
+              >
 
-<div
+                Book Appointment →
 
-className="
-max-w-7xl
-mx-auto
-px-4
-sm:px-6
-"
+              </Link>
 
->
 
+            </div>
 
-<h2
+                        {/* DOCTOR CARD */}
 
-className="
-text-3xl
-md:text-4xl
-font-bold
-text-center
-"
 
->
+            <div className="
+            border
+            rounded-2xl
+            p-8
+            hover:shadow-lg
+            transition
+            ">
 
-Who Uses
 
-<span
-className="
-text-teal-600
-"
->
+              <h3 className="
+              text-xl
+              font-bold
+              ">
 
- Quick Treat?
+                👨‍⚕️ For Doctors
 
-</span>
+              </h3>
 
 
-</h2>
 
 
+              <ul className="
+              mt-5
+              space-y-3
+              text-gray-600
+              ">
 
 
+                <li>
+                  ✓ Manage appointments
+                </li>
 
-<p
-className="
-text-center
-text-gray-500
-mt-3
-"
->
 
-Designed for patients,
-doctors and hospitals
+                <li>
+                  ✓ Live queue management
+                </li>
 
-</p>
 
+                <li>
+                  ✓ Digital prescriptions
+                </li>
 
 
+                <li>
+                  ✓ Track earnings
+                </li>
 
 
-<div
+              </ul>
 
-className="
-grid
-md:grid-cols-3
-gap-8
-mt-12
-"
 
->
-{/* ================= USER TYPES CARDS ================= */}
 
 
-<div
+              <Link
 
-className="
-grid
-md:grid-cols-3
-gap-8
-mt-12
-"
+                href="/doctor-hospital-register"
 
->
+                className="
+                block
+                mt-6
+                bg-blue-600
+                text-white
+                text-center
+                py-3
+                rounded-lg
+                "
 
+              >
 
-{/* PATIENT */}
+                Join as Doctor →
 
+              </Link>
 
-<div
 
-className="
-border
-rounded-2xl
-p-8
-hover:shadow-lg
-transition
-"
 
->
+            </div>
 
 
-<h3
-className="
-text-xl
-font-bold
-"
->
 
-👤 For Patients
 
-</h3>
 
 
 
-<ul
+            {/* HOSPITAL CARD */}
 
-className="
-mt-5
-space-y-3
-text-gray-600
-"
 
->
 
-<li>✓ Find trusted doctors</li>
+            <div className="
+            border
+            rounded-2xl
+            p-8
+            hover:shadow-lg
+            transition
+            ">
 
-<li>✓ Book appointments</li>
 
-<li>✓ Track queue live</li>
+              <h3 className="
+              text-xl
+              font-bold
+              ">
 
-<li>✓ Digital prescriptions</li>
+                🏥 For Hospitals
 
-</ul>
+              </h3>
 
 
 
 
-<Link
+              <ul className="
+              mt-5
+              space-y-3
+              text-gray-600
+              ">
 
-href="/patient-register"
 
-className="
-block
-mt-6
-bg-teal-600
-text-white
-text-center
-py-3
-rounded-lg
-"
+                <li>
+                  ✓ Manage doctors
+                </li>
 
->
 
-Book Appointment →
+                <li>
+                  ✓ Bed management
+                </li>
 
-</Link>
 
+                <li>
+                  ✓ Reports & analytics
+                </li>
 
 
-</div>
+                <li>
+                  ✓ Revenue tracking
+                </li>
 
 
+              </ul>
 
 
 
 
 
-{/* DOCTOR */}
+              <Link
 
+                href="/doctor-hospital-register"
 
+                className="
+                block
+                mt-6
+                bg-purple-600
+                text-white
+                text-center
+                py-3
+                rounded-lg
+                "
 
-<div
+              >
 
-className="
-border
-rounded-2xl
-p-8
-hover:shadow-lg
-transition
-"
+                Join Hospital →
 
->
+              </Link>
 
 
-<h3
 
-className="
-text-xl
-font-bold
-"
+            </div>
 
->
 
-👨‍⚕️ For Doctors
 
-</h3>
 
+          </div>
 
 
-<ul
+        </div>
 
-className="
-mt-5
-space-y-3
-text-gray-600
-"
 
->
+      </section>
 
-<li>✓ Manage appointments</li>
 
-<li>✓ Live queue management</li>
 
-<li>✓ Digital prescription</li>
 
-<li>✓ Earnings tracking</li>
 
 
-</ul>
 
 
 
-<Link
+      {/* ================= HOW IT WORKS ================= */}
 
-href="/doctor-hospital-register"
 
-className="
-block
-mt-6
-bg-blue-600
-text-white
-text-center
-py-3
-rounded-lg
-"
 
->
+      <section
 
-Join as Doctor →
+        id="how"
 
-</Link>
+        className="
+        py-20
+        bg-teal-50
+        "
 
 
+      >
 
-</div>
 
+        <div className="
+        max-w-7xl
+        mx-auto
+        px-4
+        sm:px-6
+        lg:px-8
+        ">
 
 
 
+          <h2 className="
+          text-3xl
+          md:text-4xl
+          font-bold
+          text-center
+          ">
 
 
+            How Quick Treat Works
 
 
-{/* HOSPITAL */}
+          </h2>
 
 
 
-<div
 
-className="
-border
-rounded-2xl
-p-8
-hover:shadow-lg
-transition
-"
 
->
+          <div className="
+          grid
+          md:grid-cols-3
+          gap-8
+          mt-12
+          ">
 
 
-<h3
+            <div className="
+            bg-white
+            rounded-2xl
+            p-8
+            text-center
+            ">
 
-className="
-text-xl
-font-bold
-"
+              <div className="
+              text-4xl
+              mb-4
+              ">
+                1️⃣
+              </div>
 
->
 
-🏥 For Hospitals
+              <h3 className="
+              font-bold
+              text-xl
+              ">
 
-</h3>
+                Create Account
 
+              </h3>
 
 
-<ul
+              <p className="
+              text-gray-600
+              mt-3
+              ">
 
-className="
-mt-5
-space-y-3
-text-gray-600
-"
+                Register as patient, doctor or hospital.
 
->
+              </p>
 
-<li>✓ Manage doctors</li>
 
-<li>✓ Bed management</li>
+            </div>
 
-<li>✓ Hospital reports</li>
 
-<li>✓ Revenue analytics</li>
 
 
-</ul>
 
 
+            <div className="
+            bg-white
+            rounded-2xl
+            p-8
+            text-center
+            ">
 
-<Link
+              <div className="
+              text-4xl
+              mb-4
+              ">
+                2️⃣
+              </div>
 
-href="/doctor-hospital-register"
 
-className="
-block
-mt-6
-bg-purple-600
-text-white
-text-center
-py-3
-rounded-lg
-"
+              <h3 className="
+              font-bold
+              text-xl
+              ">
 
->
+                Book & Manage
 
-Join Hospital →
+              </h3>
 
-</Link>
 
+              <p className="
+              text-gray-600
+              mt-3
+              ">
 
+                Book appointments and manage healthcare services easily.
 
-</div>
+              </p>
 
 
+            </div>
 
-</div>
 
 
-</div>
 
 
-</section>
 
 
+            <div className="
+            bg-white
+            rounded-2xl
+            p-8
+            text-center
+            ">
 
+              <div className="
+              text-4xl
+              mb-4
+              ">
+                3️⃣
+              </div>
 
 
+              <h3 className="
+              font-bold
+              text-xl
+              ">
 
+                Get Treatment
 
+              </h3>
 
-{/* ================= FEATURES ================= */}
 
+              <p className="
+              text-gray-600
+              mt-3
+              ">
 
+                Connect with healthcare providers without waiting.
 
-<section
+              </p>
 
-id="features"
 
-className="
-py-20
-bg-gray-50
-"
+            </div>
 
->
 
 
-<div
+          </div>
 
-className="
-max-w-7xl
-mx-auto
-px-4
-sm:px-6
-"
 
->
 
+        </div>
 
-<h2
 
-className="
-text-3xl
-md:text-4xl
-font-bold
-text-center
-"
 
->
+      </section>
 
-Everything You Need
-In One Platform
 
-</h2>
 
 
 
 
-<div
 
-className="
-grid
-grid-cols-2
-md:grid-cols-3
-lg:grid-cols-6
-gap-5
-mt-12
-"
 
->
 
+      {/* ================= FEATURES ================= */
 
-{
-[
-'Smart Queue',
-'Online Booking',
-'Digital Payments',
-'Analytics',
-'Digital Invoice',
-'Notifications'
 
-].map(item=>(
 
+      <section
 
-<div
+        id="features"
 
-key={item}
+        className="
+        py-20
+        "
 
-className="
-bg-white
-p-6
-rounded-xl
-shadow-sm
-text-center
-"
+      >
 
->
 
-<p className="font-semibold">
+        <div className="
+        max-w-7xl
+        mx-auto
+        px-4
+        sm:px-6
+        lg:px-8
+        ">
 
-{item}
 
-</p>
 
+          <h2 className="
+          text-3xl
+          md:text-4xl
+          font-bold
+          text-center
+          ">
 
-</div>
+            Everything You Need In One Platform
 
+          </h2>
 
-))
-}
 
 
-</div>
 
 
-</div>
+          <div className="
+          grid
+          grid-cols-2
+          md:grid-cols-3
+          lg:grid-cols-6
+          gap-5
+          mt-12
+          ">
 
 
-</section>
+            {
+              [
 
+                "Smart Queue",
+                "Online Booking",
+                "Digital Payment",
+                "Analytics",
+                "Digital Invoice",
+                "Notifications"
 
+              ].map((item)=>(
 
 
+                <div
 
+                  key={item}
 
+                  className="
+                  bg-white
+                  border
+                  rounded-xl
+                  p-6
+                  text-center
+                  hover:shadow-md
+                  transition
+                  "
 
+                >
 
+                  <p className="
+                  font-semibold
+                  text-sm
+                  ">
 
-{/* ================= HOW IT WORKS ================= */}
+                    {item}
 
+                  </p>
 
 
-<section
+                </div>
 
-id="how"
 
-className="
-py-20
-"
 
->
+              ))
+            }
 
 
-<div
+          </div>
 
-className="
-max-w-6xl
-mx-auto
-px-4
-sm:px-6
-"
 
->
 
+        </div>
 
-<h2
 
-className="
-text-4xl
-font-bold
-text-center
-"
+      </section>
 
->
 
-How It Works
 
-</h2>
 
 
 
 
-<div
 
-className="
-grid
-md:grid-cols-3
-gap-8
-mt-12
-"
 
->
+      /* ================= CTA ================= */}
 
 
-<div
 
-className="
-text-center
-"
+      <section className="
+      py-20
+      ">
 
->
 
-<div
-className="
-text-4xl
-"
->
-1️⃣
-</div>
+        <div className="
+        max-w-5xl
+        mx-auto
+        bg-teal-600
+        rounded-3xl
+        p-8
+        md:p-12
+        text-white
+        text-center
+        ">
 
-<h3 className="font-bold mt-4">
 
-Register
+          <h2 className="
+          text-3xl
+          md:text-4xl
+          font-bold
+          ">
 
-</h3>
+            Ready To Transform Healthcare?
 
-<p className="text-gray-600 mt-2">
+          </h2>
 
-Create your patient, doctor or hospital account.
 
-</p>
 
 
-</div>
+          <p className="
+          mt-4
+          ">
 
+            Join patients, doctors and hospitals using Quick Treat.
 
+          </p>
 
 
 
-<div
 
-className="
-text-center
-"
+          <Link
 
->
+            href="/patient-register"
 
-<div
-className="
-text-4xl
-"
->
-2️⃣
-</div>
+            className="
+            inline-block
+            mt-8
+            bg-white
+            text-teal-700
+            px-8
+            py-3
+            rounded-xl
+            font-semibold
+            "
 
+          >
 
-<h3 className="font-bold mt-4">
+            Get Started Free
 
-Connect
+          </Link>
 
-</h3>
 
 
-<p className="text-gray-600 mt-2">
+        </div>
 
-Find doctors, book appointments and manage healthcare.
 
-</p>
+      </section>
 
 
-</div>
 
 
 
 
 
-<div
 
-className="
-text-center
-"
 
->
+      {/* ================= FOOTER ================= */}
 
-<div
-className="
-text-4xl
-"
->
-3️⃣
-</div>
 
 
-<h3 className="font-bold mt-4">
+      <footer
 
-Get Treatment
+        id="contact"
 
-</h3>
+        className="
+        bg-teal-900
+        text-white
+        py-12
+        "
 
+      >
 
-<p className="text-gray-600 mt-2">
 
-Track your appointment and receive better care.
+        <div className="
+        max-w-7xl
+        mx-auto
+        px-4
+        sm:px-6
+        lg:px-8
+        grid
+        md:grid-cols-3
+        gap-8
+        ">
 
-</p>
 
 
-</div>
+          <div>
 
 
+            <h3 className="
+            text-2xl
+            font-bold
+            ">
 
-</div>
+              Quick Treat
 
+            </h3>
 
-</div>
 
+            <p className="
+            mt-3
+            text-teal-100
+            ">
 
-</section>
+              Smart Healthcare Management Platform.
 
+            </p>
 
 
+          </div>
 
 
 
 
 
-{/* ================= CTA ================= */}
 
 
+          <div>
 
-<section
 
-className="
-py-20
-"
+            <h4 className="
+            font-bold
+            text-lg
+            ">
 
->
+              Contact
 
+            </h4>
 
-<div
 
-className="
-max-w-5xl
-mx-auto
-bg-teal-600
-rounded-3xl
-p-10
-md:p-14
-text-center
-text-white
-"
+            <p className="
+            mt-3
+            text-teal-100
+            ">
 
->
+              📧 support@quicktreat.com
 
+            </p>
 
-<h2
 
-className="
-text-3xl
-md:text-4xl
-font-bold
-"
+            <p className="
+            mt-2
+            text-teal-100
+            ">
 
->
+              📞 +880 1700-000000
 
-Ready To Transform Healthcare?
+            </p>
 
-</h2>
 
+            <p className="
+            mt-2
+            text-teal-100
+            ">
 
+              📍 Bangladesh
 
-<p className="mt-5">
+            </p>
 
-Join patients, doctors and hospitals using Quick Treat.
 
-</p>
+          </div>
 
 
 
 
-<Link
 
-href="/patient-register"
 
-className="
-inline-block
-mt-8
-bg-white
-text-teal-700
-px-8
-py-3
-rounded-xl
-font-semibold
-"
 
->
+          <div>
 
-Get Started Free
 
-</Link>
+            <h4 className="
+            font-bold
+            text-lg
+            ">
 
+              Quick Links
 
-</div>
+            </h4>
 
 
-</section>
+            <div className="
+            mt-3
+            space-y-2
+            ">
 
 
+              <Link
+                href="/login"
+                className="block text-teal-100"
+              >
+                Login
+              </Link>
 
 
 
+              <Link
+                href="/patient-register"
+                className="block text-teal-100"
+              >
+                Patient Registration
+              </Link>
 
 
 
-{/* ================= FOOTER ================= */}
+            </div>
 
 
+          </div>
 
-<footer
 
-id="contact"
 
-className="
-bg-teal-900
-text-white
-py-12
-"
+        </div>
 
->
 
 
-<div
 
-className="
-max-w-7xl
-mx-auto
-px-4
-sm:px-6
-grid
-md:grid-cols-3
-gap-8
-"
 
->
+        <div className="
+        text-center
+        text-sm
+        text-teal-200
+        mt-10
+        ">
 
 
-<div>
+          © 2026 Quick Treat. All rights reserved.
 
 
-<h3
+        </div>
 
-className="
-text-2xl
-font-bold
-"
 
->
 
-Quick Treat
+      </footer>
 
-</h3>
 
 
-<p className="mt-3 text-teal-100">
 
-Smart Healthcare Management Platform
+    </main>
 
-</p>
-
-
-</div>
-
-
-
-
-
-
-<div>
-
-
-<h4 className="font-bold">
-
-Contact
-
-</h4>
-
-
-<p className="mt-3 text-teal-100">
-
-📞 +880 1XXX-XXXXXX
-
-</p>
-
-
-<p className="text-teal-100">
-
-✉ support@quicktreat.com
-
-</p>
-
-
-<p className="text-teal-100">
-
-📍 Bangladesh
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-
-<div>
-
-
-<h4 className="font-bold">
-
-Quick Links
-
-</h4>
-
-
-<div className="mt-3 space-y-2">
-
-
-<Link href="/patient-register" className="block">
-
-Patient Registration
-
-</Link>
-
-
-<Link href="/doctor-hospital-register" className="block">
-
-Doctor / Hospital Registration
-
-</Link>
-
-
-<Link href="/login" className="block">
-
-Login
-
-</Link>
-
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-<div
-
-className="
-text-center
-border-t
-border-teal-700
-mt-10
-pt-6
-text-sm
-"
-
->
-
-© 2026 Quick Treat. All rights reserved.
-
-</div>
-
-
-
-</footer>
-
-
-
-
-
-</main>
-
-)
+  )
 
 }
