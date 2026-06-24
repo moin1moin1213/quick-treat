@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase/server";
-
+import { supabaseServer } from "@/lib/supabase/server";
 
 export async function POST(req:Request){
 
@@ -14,7 +13,7 @@ otp
 
 const {
 data
-}=await supabase
+}=await supabaseServer
 .from("sms_otps")
 .select("*")
 .eq("phone",phone)
@@ -56,7 +55,7 @@ message:"OTP expired"
 
 
 
-await supabase
+await supabaseServer
 .from("sms_otps")
 .update({
 verified:true
