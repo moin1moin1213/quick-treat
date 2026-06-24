@@ -195,9 +195,7 @@ const [upazilas,setUpazilas]=useState<Upazila[]>([])
 
 
 
-const [selectedDistrict,setSelectedDistrict] =
-useState('')
-
+const [selectedDistrict, setSelectedDistrict] = useState<string>('')
 
 
 
@@ -1814,12 +1812,7 @@ required:'District required'
 
 
 
-onChange={
-e=>setSelectedDistrict(
-e.target.value
-)
-}
-
+onChange={(e) => setSelectedDistrict(e.target.value)}
 
 
 className="form-input"
