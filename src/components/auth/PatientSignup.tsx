@@ -1,11 +1,29 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client'
-import toast from 'react-hot-toast'
+import { 
+  useState,
+  useEffect
+} from 'react'
+
 import {
+  useForm
+} from 'react-hook-form'
+
+import {
+  useRouter
+} from 'next/navigation'
+
+
+import {
+  supabase
+} from '@/lib/supabase/client'
+
+
+import toast from 'react-hot-toast'
+
+
+import {
+
   User,
   Mail,
   Phone,
@@ -13,103 +31,174 @@ import {
   Droplets,
   MapPin,
   Lock
+
 } from 'lucide-react'
+
+
+
 
 
 interface PatientSignupForm {
 
+
   name:string
+
 
   email:string
 
+
   phone:string
+
 
   whatsapp:string
 
+
   date_of_birth:string
+
 
   blood_group:string
 
+
   district:string
+
 
   upazila:string
 
+
   password:string
+
 
   confirmPassword:string
 
+
 }
+
+
 
 
 
 interface District {
 
- id:number
+  id:number
 
- name:string
+  name:string
 
 }
+
+
 
 
 
 interface Upazila {
 
- id:number
+  id:number
 
- name:string
+  name:string
 
 }
 
 
 
+
+
+
+
 const bloodGroups=[
 
- 'A+',
- 'A-',
- 'B+',
- 'B-',
- 'O+',
- 'O-',
- 'AB+',
- 'AB-'
+'A+',
+'A-',
+'B+',
+'B-',
+'O+',
+'O-',
+'AB+',
+'AB-'
 
 ]
 
 
 
+
+
+
+
+
+
 export default function PatientSignup({
 
- onClose
+onClose
 
 }:{
 
- onClose:()=>void
+onClose:()=>void
 
 }){
+
+
+
 
 
 const router = useRouter()
 
 
 
+
+
 const [isLoading,setIsLoading]=useState(false)
+
+
+
 
 
 const [districts,setDistricts]=useState<District[]>([])
 
+
 const [upazilas,setUpazilas]=useState<Upazila[]>([])
+
+
 
 const [selectedDistrict,setSelectedDistrict]=useState('')
 
 
 
+
+
+// =====================
+// OTP STATES
+// =====================
+
+
+const [otpSent,setOtpSent]=useState(false)
+
+
+const [otpVerified,setOtpVerified]=useState(false)
+
+
+const [otp,setOtp]=useState('')
+
+
+const [sendingOtp,setSendingOtp]=useState(false)
+
+
+const [verifyingOtp,setVerifyingOtp]=useState(false)
+
+
+
+
+
+
+
 const {
 
- register,
+register,
 
- handleSubmit,
+handleSubmit,
 
- formState:{errors}
+getValues,
+
+formState:{
+errors
+}
 
 }=useForm<PatientSignupForm>()
 
@@ -117,9 +206,83 @@ const {
 
 
 
+
+const phone = getValues('phone')
+
+
+
+
+
+
+
+
+
 // ===============================
-// LOAD DISTRICT
+// PHONE FORMAT
+// RT Communication
+// 8801XXXXXXXXX
 // ===============================
+
+
+
+const formatPhoneNumber=(number:string)=>{
+
+
+const phoneNumber =
+number.replace(/\D/g,'')
+
+
+
+
+
+// already 880 format
+
+if(phoneNumber.startsWith('880')){
+
+
+return phoneNumber
+
+
+}
+
+
+
+
+
+
+// Bangladesh local format
+
+if(phoneNumber.startsWith('01')){
+
+
+return `880${phoneNumber}`
+
+
+}
+
+
+
+
+return phoneNumber
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ===============================
+// LOAD DISTRICTS
+// ===============================
+
 
 
 const fetchDistricts=async()=>{
@@ -133,23 +296,36 @@ error
 
 }=await supabase
 
+
 .from('districts')
 
+
 .select('id,name')
+
 
 .order('name')
 
 
 
+
+
 if(!error){
 
-setDistricts(data || [])
+
+setDistricts(
+data || []
+)
+
 
 }
 
 
 
 }
+
+
+
+
 
 
 
@@ -162,6 +338,7 @@ districtId:string
 )=>{
 
 
+
 const {
 
 data,
@@ -170,9 +347,13 @@ error
 
 }=await supabase
 
+
+
 .from('upazilas')
 
+
 .select('id,name')
+
 
 .eq(
 
@@ -182,19 +363,33 @@ parseInt(districtId)
 
 )
 
+
 .order('name')
+
+
+
 
 
 
 if(!error){
 
-setUpazilas(data || [])
+
+setUpazilas(
+data || []
+)
+
 
 }
 
 
 
 }
+
+
+
+
+
+
 
 
 
@@ -202,9 +397,17 @@ setUpazilas(data || [])
 
 useEffect(()=>{
 
+
 fetchDistricts()
 
+
 },[])
+
+
+
+
+
+
 
 
 
@@ -214,18 +417,394 @@ useEffect(()=>{
 
 if(selectedDistrict){
 
-fetchUpazilas(selectedDistrict)
+
+fetchUpazilas(
+selectedDistrict
+)
+
 
 }
 
 else{
 
+
 setUpazilas([])
+
 
 }
 
 
+
 },[selectedDistrict])
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===============================
+// SEND OTP
+// ===============================
+
+
+
+const sendOTP=async()=>{
+
+
+
+if(!phone){
+
+
+toast.error(
+'Enter phone number first'
+)
+
+
+return
+
+
+}
+
+
+
+
+
+
+const formattedPhone =
+formatPhoneNumber(phone)
+
+
+
+
+
+
+if(formattedPhone.length !== 13){
+
+
+
+toast.error(
+'Enter valid phone number'
+)
+
+
+
+return
+
+
+}
+
+
+
+
+
+
+
+
+try{
+
+
+setSendingOtp(true)
+
+
+
+
+
+
+const response = await fetch(
+
+
+'/api/send-otp',
+
+
+{
+
+
+method:'POST',
+
+
+headers:{
+
+
+'Content-Type':
+'application/json'
+
+
+},
+
+
+
+body:JSON.stringify({
+
+
+phone:formattedPhone
+
+
+})
+
+
+
+}
+
+
+
+)
+
+
+
+
+
+
+
+
+const result =
+await response.json()
+
+
+
+
+
+
+if(result.success){
+
+
+setOtpSent(true)
+
+
+toast.success(
+'OTP sent successfully'
+)
+
+
+
+}
+
+else{
+
+
+toast.error(
+
+result.message ||
+
+'OTP send failed'
+
+)
+
+
+
+}
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+error
+)
+
+
+
+toast.error(
+'OTP service error'
+)
+
+
+
+}
+
+
+
+finally{
+
+
+setSendingOtp(false)
+
+
+
+}
+
+
+
+}
+// ===============================
+// VERIFY OTP
+// ===============================
+
+
+const verifyOTP=async()=>{
+
+
+if(!otp){
+
+
+toast.error(
+'Enter OTP'
+)
+
+
+return
+
+}
+
+
+
+const formattedPhone =
+formatPhoneNumber(phone)
+
+
+
+
+
+try{
+
+
+setVerifyingOtp(true)
+
+
+
+
+
+const response = await fetch(
+
+
+'/api/verify-otp',
+
+
+{
+
+
+method:'POST',
+
+
+headers:{
+
+
+'Content-Type':
+'application/json'
+
+
+},
+
+
+
+body:JSON.stringify({
+
+
+phone:formattedPhone,
+
+
+otp
+
+
+})
+
+
+
+}
+
+
+
+)
+
+
+
+
+
+
+
+
+const result =
+await response.json()
+
+
+
+
+
+
+if(result.success){
+
+
+
+setOtpVerified(true)
+
+
+
+toast.success(
+'Phone verified successfully'
+)
+
+
+
+}
+
+else{
+
+
+
+toast.error(
+
+result.message ||
+
+'Invalid OTP'
+
+)
+
+
+
+}
+
+
+
+
+}
+
+
+catch(error){
+
+
+console.error(
+error
+)
+
+
+toast.error(
+'OTP verification failed'
+)
+
+
+
+}
+
+
+finally{
+
+
+setVerifyingOtp(false)
+
+
+}
+
+
+
+}
+
+
+
+
+
+
 
 
 
@@ -237,6 +816,7 @@ setUpazilas([])
 // ===============================
 
 
+
 const onSubmit=async(
 
 data:PatientSignupForm
@@ -244,27 +824,65 @@ data:PatientSignupForm
 )=>{
 
 
+
+
+
+if(!otpVerified){
+
+
+toast.error(
+'Please verify phone number first'
+)
+
+
+return
+
+
+}
+
+
+
+
+
+
 if(data.password !== data.confirmPassword){
+
+
 
 toast.error(
 'Passwords do not match'
 )
 
+
+
 return
 
+
 }
+
+
+
 
 
 
 if(data.password.length < 6){
 
+
+
 toast.error(
-'Password must be minimum 6 characters'
+'Password minimum 6 characters'
 )
+
+
 
 return
 
+
 }
+
+
+
+
 
 
 
@@ -272,10 +890,15 @@ setIsLoading(true)
 
 
 
+
+
 try{
 
 
-// Check existing email
+
+
+
+// CHECK EMAIL EXIST
 
 
 const {
@@ -284,9 +907,12 @@ data:existingUser
 
 }=await supabase
 
+
 .from('profiles')
 
+
 .select('email')
+
 
 .eq(
 
@@ -296,19 +922,31 @@ data.email
 
 )
 
+
 .maybeSingle()
+
+
+
 
 
 
 if(existingUser){
 
+
+
 toast.error(
 'Email already registered'
 )
 
+
+
 setIsLoading(false)
 
+
+
 return
+
+
 
 }
 
@@ -316,23 +954,39 @@ return
 
 
 
-// Create Auth User
+
+
+
+
+// CREATE AUTH USER
+
 
 
 const {
 
+
 data:authData,
+
 
 error:authError
 
+
+
 }=await supabase.auth.signUp({
 
+
+
 email:data.email,
+
+
 
 password:data.password,
 
 
+
+
 options:{
+
 
 
 data:{
@@ -340,23 +994,40 @@ data:{
 
 name:data.name,
 
+
 role:'patient',
 
-phone:data.phone,
+
+
+phone:
+formatPhoneNumber(
+data.phone
+),
+
+
 
 whatsapp:data.whatsapp,
 
+
+
 district:data.district,
 
+
+
 upazila:data.upazila,
+
+
 
 is_approved:true
 
 
+
 }
 
 
+
 }
+
 
 
 })
@@ -364,11 +1035,22 @@ is_approved:true
 
 
 
+
+
+
+
+
 if(authError){
+
 
 throw authError
 
+
 }
+
+
+
+
 
 
 
@@ -378,51 +1060,81 @@ if(authData.user){
 
 
 
-// Create profile
+
+
+
+// CREATE PROFILE
+
 
 
 const {
 
+
 error:profileError
+
+
 
 }=await supabase
 
+
+
 .from('profiles')
 
+
+
 .insert({
+
+
+
 
 
 id:authData.user.id,
 
 
+
 name:data.name,
+
 
 
 email:data.email,
 
 
-phone:data.phone,
+
+phone:
+formatPhoneNumber(
+data.phone
+),
+
 
 
 whatsapp:data.whatsapp,
 
 
+
 role:'patient',
+
 
 
 district:data.district,
 
 
+
 upazila:data.upazila,
+
 
 
 date_of_birth:data.date_of_birth,
 
 
+
 blood_group:data.blood_group,
 
 
+
 is_approved:true
+
+
+
 
 
 })
@@ -431,11 +1143,20 @@ is_approved:true
 
 
 
+
+
 if(profileError){
+
 
 throw profileError
 
+
 }
+
+
+
+
+
 
 
 
@@ -449,26 +1170,47 @@ toast.success(
 
 
 
+
+
+
+
+
 onClose()
 
 
 
 
 
-// Auto Login
+
+
+// AUTO LOGIN
+
 
 
 const {
 
+
 error:loginError
+
+
 
 }=await supabase.auth.signInWithPassword({
 
+
+
 email:data.email,
+
+
 
 password:data.password
 
+
+
 })
+
+
+
+
 
 
 
@@ -476,12 +1218,17 @@ password:data.password
 if(!loginError){
 
 
+
 router.push(
+
 '/patient/dashboard'
+
 )
 
 
+
 router.refresh()
+
 
 
 }
@@ -489,273 +1236,121 @@ router.refresh()
 else{
 
 
-router.push('/')
+
+router.push(
+
+'/login'
+
+)
+
+
 
 }
 
 
 
+
+
 }
 
 
 
-} catch (error: unknown) {
 
-  console.error(
-    'Signup Error:',
-    error
-  )
 
-  toast.error(
-    error instanceof Error
-      ? error.message
-      : 'Signup failed'
-  )
-
-} finally {
-
-  setIsLoading(false)
 
 }
+
+
+
+catch(error:unknown){
+
+
+
+console.error(
+
+'Signup Error:',
+
+error
+
+)
+
+
+
+
+
+toast.error(
+
+
+
+error instanceof Error
+
+
+?
+
+
+error.message
+
+
+:
+
+
+'Signup failed'
+
+
+
+)
+
+
+
+}
+
+
+
+
+finally{
+
+
+
+setIsLoading(false)
+
+
+
+}
+
+
+
 
 }
 return (
 
 <form
-onSubmit={handleSubmit(onSubmit)}
+
+onSubmit={
+handleSubmit(onSubmit)
+}
+
 className="
 space-y-6
 max-h-[75vh]
 overflow-y-auto
 px-1
 "
+
 >
 
 
-{/* Personal Information */}
 
-<div>
-
-<div className="
-flex items-center gap-2
-mb-4
-">
-
-<User size={20} className="text-primary"/>
-
-<h3 className="
-font-semibold
-text-teal-dark
-">
-Personal Information
-</h3>
-
-</div>
-
-
-
-<div className="
-grid
-grid-cols-1
-md:grid-cols-2
-gap-4
-">
-
-
-<div>
-
-<label className="input-label">
-Full Name *
-</label>
-
-<div className="relative">
-
-<User className="input-icon"/>
-
-<input
-
-type="text"
-
-placeholder="Md. Rahman"
-
-{...register(
-'name',
-{
-required:'Name is required'
-}
-)}
-
-className="input-field pl-10"
-
-/>
-
-</div>
-
-
-{errors.name &&
-
-<p className="error-text">
-{errors.name.message}
-</p>
-
-}
-
-</div>
-
-
-
-
-
-<div>
-
-<label className="input-label">
-Email Address *
-</label>
-
-
-<div className="relative">
-
-<Mail className="input-icon"/>
-
-
-<input
-
-type="email"
-
-placeholder="patient@email.com"
-
-{...register(
-'email',
-{
-required:'Email is required'
-}
-)}
-
-className="input-field pl-10"
-
-/>
-
-
-</div>
-
-
-{errors.email &&
-
-<p className="error-text">
-{errors.email.message}
-</p>
-
-}
-
-
-</div>
-
-
-
-
-
-<div>
-
-<label className="input-label">
-Phone Number *
-</label>
-
-
-<div className="relative">
-
-<Phone className="input-icon"/>
-
-
-<input
-
-type="tel"
-
-placeholder="01712-345678"
-
-{...register(
-'phone',
-{
-required:'Phone is required'
-}
-)}
-
-className="input-field pl-10"
-
-/>
-
-
-</div>
-
-
-{errors.phone &&
-
-<p className="error-text">
-{errors.phone.message}
-</p>
-
-}
-
-</div>
-
-
-
-
-
-<div>
-
-<label className="input-label">
-WhatsApp Number
-</label>
-
-
-<div className="relative">
-
-<Phone className="input-icon"/>
-
-
-<input
-
-type="tel"
-
-placeholder="01712-345678"
-
-{...register(
-'whatsapp'
-)}
-
-className="input-field pl-10"
-
-/>
-
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-</div>
-
-
-
-
-
-{/* Medical Information */}
-
+{/* PERSONAL INFORMATION */}
 
 <div>
 
 
 <div className="
-flex items-center gap-2
-mb-4
+flex items-center gap-2 mb-4
 ">
 
 
-<Droplets
+<User
 size={20}
 className="text-primary"
 />
@@ -765,11 +1360,15 @@ className="text-primary"
 font-semibold
 text-teal-dark
 ">
-Medical Information
+
+Personal Information
+
 </h3>
 
 
 </div>
+
+
 
 
 
@@ -782,11 +1381,524 @@ gap-4
 ">
 
 
+
+
+
+{/* NAME */}
+
 <div>
 
 
 <label className="input-label">
+
+Full Name *
+
+</label>
+
+
+<div className="relative">
+
+
+<User className="input-icon"/>
+
+
+
+<input
+
+type="text"
+
+placeholder="Md. Rahman"
+
+
+{...register(
+
+'name',
+
+{
+
+required:'Name is required'
+
+}
+
+)}
+
+
+className="
+input-field
+pl-10
+"
+
+/>
+
+
+</div>
+
+
+
+{
+errors.name &&
+
+<p className="error-text">
+
+{errors.name.message}
+
+</p>
+
+}
+
+
+</div>
+
+
+
+
+
+
+
+
+
+{/* EMAIL */}
+
+
+<div>
+
+
+<label className="input-label">
+
+Email Address *
+
+</label>
+
+
+
+<div className="relative">
+
+
+<Mail className="input-icon"/>
+
+
+
+<input
+
+type="email"
+
+
+placeholder="patient@email.com"
+
+
+
+{...register(
+
+'email',
+
+{
+
+required:'Email is required'
+
+}
+
+)}
+
+
+
+className="
+input-field
+pl-10
+"
+
+/>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+{/* PHONE + OTP */}
+
+
+<div>
+
+
+<label className="input-label">
+
+Phone Number *
+
+</label>
+
+
+
+<div className="
+flex gap-2
+">
+
+
+<div className="
+relative flex-1
+">
+
+
+<Phone className="input-icon"/>
+
+
+
+<input
+
+
+type="tel"
+
+
+placeholder="01712345678"
+
+
+
+{...register(
+
+'phone',
+
+{
+
+required:'Phone is required'
+
+}
+
+)}
+
+
+
+disabled={otpVerified}
+
+
+
+className="
+input-field
+pl-10
+"
+
+/>
+
+
+</div>
+
+
+
+
+
+<button
+
+
+type="button"
+
+
+onClick={sendOTP}
+
+
+disabled={
+sendingOtp || otpVerified
+}
+
+
+
+className="
+bg-teal-600
+text-white
+px-4
+rounded-xl
+text-sm
+"
+
+
+>
+
+
+
+{
+
+otpVerified
+
+?
+
+'Verified'
+
+:
+
+sendingOtp
+
+?
+
+'Sending'
+
+:
+
+'Send OTP'
+
+
+}
+
+
+
+</button>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+{/* OTP BOX */}
+
+
+{
+
+otpSent && !otpVerified &&
+
+<div>
+
+
+<label className="input-label">
+
+Enter OTP
+
+</label>
+
+
+
+<div className="
+flex gap-2
+">
+
+
+
+<input
+
+
+type="text"
+
+
+maxLength={6}
+
+
+value={otp}
+
+
+onChange={(e)=>
+
+setOtp(e.target.value)
+
+}
+
+
+placeholder="123456"
+
+
+className="
+input-field
+"
+
+/>
+
+
+
+
+
+<button
+
+
+type="button"
+
+
+onClick={verifyOTP}
+
+
+disabled={verifyingOtp}
+
+
+
+className="
+bg-green-600
+text-white
+px-5
+rounded-xl
+"
+
+
+>
+
+
+
+{
+
+verifyingOtp
+
+?
+
+'Checking'
+
+:
+
+'Verify'
+
+}
+
+
+
+</button>
+
+
+
+
+</div>
+
+
+
+</div>
+
+
+}
+
+
+
+
+
+
+
+
+
+{/* WHATSAPP */}
+
+
+<div>
+
+
+<label className="input-label">
+
+WhatsApp Number
+
+</label>
+
+
+
+<div className="relative">
+
+
+<Phone className="input-icon"/>
+
+
+
+<input
+
+
+type="tel"
+
+
+placeholder="01712345678"
+
+
+{...register(
+
+'whatsapp'
+
+)}
+
+
+
+className="
+input-field
+pl-10
+"
+
+/>
+
+
+</div>
+
+
+</div>
+
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+{/* MEDICAL INFORMATION */}
+
+
+<div>
+
+
+
+<div className="
+flex items-center gap-2 mb-4
+">
+
+
+<Droplets
+
+size={20}
+
+className="text-primary"
+
+/>
+
+
+<h3 className="
+font-semibold
+text-teal-dark
+">
+
+Medical Information
+
+</h3>
+
+
+</div>
+
+
+
+
+
+<div className="
+grid
+md:grid-cols-2
+gap-4
+">
+
+
+
+<div>
+
+
+<label className="input-label">
+
 Date of Birth
+
 </label>
 
 
@@ -796,23 +1908,38 @@ Date of Birth
 <Calendar className="input-icon"/>
 
 
+
 <input
+
 
 type="date"
 
+
+
 {...register(
+
 'date_of_birth'
+
 )}
 
-className="input-field pl-10"
+
+
+className="
+input-field
+pl-10
+"
 
 />
 
 
+
 </div>
 
 
+
 </div>
+
+
 
 
 
@@ -822,64 +1949,77 @@ className="input-field pl-10"
 
 
 <label className="input-label">
+
 Blood Group
+
 </label>
 
-
-<div className="relative">
-
-
-<Droplets className="input-icon"/>
 
 
 <select
 
+
 {...register(
+
 'blood_group'
+
 )}
+
+
 
 className="
 input-field
-pl-10
 "
+
+
 
 >
 
 
 <option value="">
+
 Select Blood Group
+
 </option>
 
 
 {
+
 bloodGroups.map(bg=>(
 
+
 <option
+
 key={bg}
+
 value={bg}
+
 >
 
 {bg}
 
 </option>
 
+
 ))
+
 }
 
 
 </select>
 
 
+
+</div>
+
+
+
 </div>
 
 
 </div>
 
 
-</div>
-
-
-</div>
 
 
 
@@ -887,21 +2027,25 @@ value={bg}
 
 
 
-{/* Location */}
+{/* LOCATION */}
+
 
 
 <div>
 
 
+
 <div className="
-flex items-center gap-2
-mb-4
+flex items-center gap-2 mb-4
 ">
 
 
 <MapPin
+
 size={20}
+
 className="text-primary"
+
 />
 
 
@@ -909,7 +2053,9 @@ className="text-primary"
 font-semibold
 text-teal-dark
 ">
+
 Location
+
 </h3>
 
 
@@ -918,23 +2064,17 @@ Location
 
 
 
+
 <div className="
 grid
-grid-cols-1
 md:grid-cols-2
 gap-4
 ">
 
 
-<div>
-
-
-<label className="input-label">
-District *
-</label>
-
 
 <select
+
 
 
 {...register(
@@ -942,35 +2082,46 @@ District *
 'district',
 
 {
+
 required:'District required'
+
 }
 
 )}
 
 
+
 onChange={(e)=>{
+
 
 setSelectedDistrict(
 e.target.value
 )
 
+
 }}
 
 
-className="input-field"
+
+className="
+input-field
+"
 
 
 >
 
 
 <option value="">
+
 Select District
+
 </option>
 
 
 {
 
 districts.map(d=>(
+
 
 <option
 
@@ -980,11 +2131,15 @@ value={d.id}
 
 >
 
+
 {d.name}
+
 
 </option>
 
+
 ))
+
 
 }
 
@@ -993,29 +2148,8 @@ value={d.id}
 
 
 
-{errors.district &&
-
-<p className="error-text">
-
-{errors.district.message}
-
-</p>
-
-}
 
 
-</div>
-
-
-
-
-
-<div>
-
-
-<label className="input-label">
-Upazila *
-</label>
 
 
 
@@ -1027,30 +2161,44 @@ Upazila *
 'upazila',
 
 {
+
 required:'Upazila required'
+
 }
 
 )}
 
 
+
 disabled={!selectedDistrict}
 
 
-className="input-field disabled:bg-gray-100"
+
+className="
+input-field
+disabled:bg-gray-100
+"
+
 
 
 >
 
 
 <option value="">
+
+
 Select Upazila
+
+
 </option>
+
 
 
 
 {
 
 upazilas.map(u=>(
+
 
 <option
 
@@ -1064,30 +2212,21 @@ value={u.id}
 
 </option>
 
+
 ))
 
+
 }
+
 
 
 </select>
 
 
-{errors.upazila &&
-
-<p className="error-text">
-
-{errors.upazila.message}
-
-</p>
-
-}
-
 
 
 </div>
 
-
-</div>
 
 
 </div>
@@ -1097,22 +2236,28 @@ value={u.id}
 
 
 
-{/* Password */}
+
+
+
+{/* SECURITY */}
 
 
 
 <div>
 
 
+
 <div className="
-flex items-center gap-2
-mb-4
+flex items-center gap-2 mb-4
 ">
 
 
 <Lock
+
 size={20}
+
 className="text-primary"
+
 />
 
 
@@ -1120,7 +2265,9 @@ className="text-primary"
 font-semibold
 text-teal-dark
 ">
+
 Security
+
 </h3>
 
 
@@ -1129,28 +2276,28 @@ Security
 
 
 
+
+
+
 <div className="
 grid
-grid-cols-1
 md:grid-cols-2
 gap-4
 ">
 
 
-<div>
 
-
-<label className="input-label">
-Password *
-</label>
 
 
 <input
 
+
 type="password"
 
 
-placeholder="Minimum 6 characters"
+
+placeholder="Password"
+
 
 
 {...register(
@@ -1174,42 +2321,30 @@ message:'Minimum 6 characters'
 )}
 
 
-className="input-field"
+
+className="
+input-field
+"
+
+
 
 />
 
 
 
-{errors.password &&
-
-<p className="error-text">
-
-{errors.password.message}
-
-</p>
-
-}
 
 
-</div>
-
-
-
-
-
-<div>
-
-
-<label className="input-label">
-Confirm Password *
-</label>
 
 
 <input
 
+
 type="password"
 
-placeholder="Confirm password"
+
+
+placeholder="Confirm Password"
+
 
 
 {...register(
@@ -1225,21 +2360,17 @@ required:'Confirm password'
 )}
 
 
-className="input-field"
+
+className="
+input-field
+"
+
+
 
 />
 
 
 
-{errors.confirmPassword &&
-
-<p className="error-text">
-
-{errors.confirmPassword.message}
-
-</p>
-
-}
 
 
 </div>
@@ -1248,7 +2379,6 @@ className="input-field"
 </div>
 
 
-</div>
 
 
 
@@ -1258,33 +2388,25 @@ className="input-field"
 
 <button
 
-disabled={isLoading}
 
 type="submit"
 
 
+disabled={isLoading}
+
+
+
 className="
-
 w-full
-
 bg-primary
-
 hover:bg-primary-dark
-
 text-white
-
 py-3.5
-
 rounded-xl
-
 font-semibold
-
 transition
-
 disabled:opacity-50
-
 shadow-lg
-
 "
 
 
@@ -1303,10 +2425,14 @@ isLoading
 
 'Create Patient Account'
 
+
 }
 
 
+
 </button>
+
+
 
 
 
@@ -1318,9 +2444,12 @@ text-sm
 text-text-grey
 ">
 
+
 By registering you agree with Quick Treat terms & privacy policy.
 
+
 </p>
+
 
 
 

@@ -1,40 +1,50 @@
 'use client'
 
-import { 
- useState,
- useEffect
+
+import {
+useState,
+useEffect
 } from 'react'
 
+
 import {
- useForm
+useForm
 } from 'react-hook-form'
 
-import {
- useRouter
-} from 'next/navigation'
 
 import {
- supabase
+useRouter
+} from 'next/navigation'
+
+
+import {
+supabase
 } from '@/lib/supabase/client'
+
 
 import toast from 'react-hot-toast'
 
 
+
 import {
- User,
- Mail,
- Phone,
- Stethoscope,
- GraduationCap,
- MapPin,
- Lock,
- BadgeCheck,
- Wallet
+User,
+Mail,
+Phone,
+Stethoscope,
+GraduationCap,
+MapPin,
+Lock,
+BadgeCheck,
+
+ShieldCheck
 } from 'lucide-react'
 
 
 
+
+
 interface DoctorSignupForm {
+
 
 name:string
 
@@ -62,31 +72,47 @@ password:string
 
 confirmPassword:string
 
+
 }
+
+
+
 
 
 
 interface District{
 
+
 id:number
 
 name:string
 
+
 }
+
+
+
 
 
 
 interface Upazila{
 
+
 id:number
 
 name:string
+
 
 }
 
 
 
+
+
+
+
 const specialities=[
+
 
 'Cardiologist',
 
@@ -112,11 +138,17 @@ const specialities=[
 
 'Gastroenterologist'
 
+
 ]
 
 
 
+
+
+
+
 const degrees=[
+
 
 'MBBS',
 
@@ -134,45 +166,103 @@ const degrees=[
 
 'FRCS'
 
+
 ]
+
+
+
+
+
 
 
 
 
 export default function DoctorSignup({
 
+
 onClose
+
 
 }:{
 
+
 onClose:()=>void
 
+
 }){
+
+
+
 
 
 const router = useRouter()
 
 
 
+
+
+
 const [isLoading,setIsLoading]=useState(false)
+
+
+
 
 
 const [districts,setDistricts]=useState<District[]>([])
 
+
 const [upazilas,setUpazilas]=useState<Upazila[]>([])
+
 
 const [selectedDistrict,setSelectedDistrict]=useState('')
 
 
 
 
+
+
+
+// OTP STATE
+
+
+const [otpSent,setOtpSent]=useState(false)
+
+
+const [otpVerified,setOtpVerified]=useState(false)
+
+
+const [otp,setOtp]=useState('')
+
+
+const [otpLoading,setOtpLoading]=useState(false)
+
+
+
+
+
+const [generatedOtp,setGeneratedOtp]=useState('')
+
+
+
+
+
+
+
+
+
 const {
+
 
 register,
 
+
 handleSubmit,
 
-formState:{errors}
+
+getValues,
+
+
+
 
 }=useForm<DoctorSignupForm>()
 
@@ -180,39 +270,340 @@ formState:{errors}
 
 
 
-// ============================
+
+
+
+
+// ================================
+// PHONE FORMAT
+// 017XXXXXXXX
+// TO
+// 88017XXXXXXXX
+// ================================
+
+
+
+const formatPhoneNumber=(phone:string)=>{
+
+
+const number = phone.replace(
+/\D/g,
+''
+)
+
+
+if(number.startsWith('880')){
+
+
+return number
+
+}
+
+
+
+if(number.startsWith('01')){
+
+
+return '88'+number
+
+}
+
+
+
+return number
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ================================
+// SEND OTP
+// ================================
+
+
+const sendOTP=async()=>{
+
+
+
+const phone = getValues('phone')
+
+
+
+if(!phone){
+
+
+toast.error(
+'Enter phone number first'
+)
+
+
+return
+
+
+}
+
+
+
+
+
+const phoneNumber =
+formatPhoneNumber(phone)
+
+
+
+
+
+setOtpLoading(true)
+
+
+
+
+
+try{
+
+
+
+const otpCode = 
+Math.floor(
+100000 +
+Math.random()*900000
+)
+.toString()
+
+
+
+
+
+
+const response = await fetch(
+'/api/send-otp',
+{
+
+
+method:'POST',
+
+
+headers:{
+
+
+'Content-Type':'application/json'
+
+
+},
+
+
+body:JSON.stringify({
+
+
+phone:phoneNumber,
+
+
+otp:otpCode
+
+
+})
+
+
+}
+
+)
+
+
+
+
+
+
+const result =
+await response.json()
+
+
+
+
+
+
+
+if(!response.ok){
+
+
+throw new Error(
+result.message ||
+'OTP send failed'
+)
+
+
+}
+
+
+
+
+
+
+setGeneratedOtp(
+otpCode
+)
+
+
+
+setOtpSent(true)
+
+
+
+toast.success(
+'OTP sent successfully'
+)
+
+
+
+
+
+}catch(error){
+
+
+
+console.error(error)
+
+
+toast.error(
+'Failed to send OTP'
+)
+
+
+
+}finally{
+
+
+setOtpLoading(false)
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ================================
+// VERIFY OTP
+// ================================
+
+
+
+const verifyOTP=()=>{
+
+
+if(
+otp === generatedOtp
+){
+
+
+setOtpVerified(true)
+
+
+toast.success(
+'Phone verified'
+)
+
+
+
+}
+
+else{
+
+
+toast.error(
+'Invalid OTP'
+)
+
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+// ================================
 // LOCATION
-// ============================
+// ================================
 
 
 
 const fetchDistricts=async()=>{
 
 
+
 const {
+
 
 data,
 
+
 error
+
 
 }=await supabase
 
+
 .from('districts')
 
-.select('id,name')
 
-.order('name')
+.select(
+'id,name'
+)
+
+
+.order(
+'name'
+)
+
+
+
 
 
 
 if(!error){
 
-setDistricts(data || [])
+
+setDistricts(
+data || []
+)
+
 
 }
 
 
+
 }
+
+
+
+
 
 
 
@@ -220,22 +611,33 @@ setDistricts(data || [])
 
 const fetchUpazilas=async(
 
+
 districtId:string
+
 
 )=>{
 
 
+
 const {
+
 
 data,
 
+
 error
+
 
 }=await supabase
 
+
 .from('upazilas')
 
-.select('id,name')
+
+.select(
+'id,name'
+)
+
 
 .eq(
 
@@ -245,25 +647,44 @@ parseInt(districtId)
 
 )
 
-.order('name')
+
+.order(
+'name'
+)
+
+
+
 
 
 
 if(!error){
 
-setUpazilas(data || [])
+
+setUpazilas(
+data || []
+)
+
 
 }
 
 
+
+
 }
+
+
+
+
+
 
 
 
 
 useEffect(()=>{
 
+
 fetchDistricts()
+
 
 },[])
 
@@ -271,63 +692,85 @@ fetchDistricts()
 
 
 
+
+
 useEffect(()=>{
+
 
 
 if(selectedDistrict){
 
-fetchUpazilas(selectedDistrict)
+
+fetchUpazilas(
+selectedDistrict
+)
+
 
 }
 
 else{
 
+
 setUpazilas([])
+
 
 }
 
 
+
 },[selectedDistrict])
-
-
-
-
-
-
-
-// ============================
+// ================================
 // SUBMIT
-// ============================
+// ================================
 
 
-const onSubmit=async(
-
+const onSubmit = async(
 data:DoctorSignupForm
-
 )=>{
 
 
+if(!otpVerified){
+
+toast.error(
+'Please verify your phone number first'
+)
+
+return
+
+}
+
+
+
 if(data.password !== data.confirmPassword){
+
 
 toast.error(
 'Passwords do not match'
 )
 
+
 return
 
+
 }
+
 
 
 
 if(data.password.length < 6){
 
+
 toast.error(
 'Password minimum 6 characters'
 )
 
+
 return
 
+
 }
+
+
 
 
 
@@ -335,10 +778,39 @@ setIsLoading(true)
 
 
 
+
+
 try{
 
 
-// email check
+
+// FORMAT PHONE
+
+
+const phoneNumber =
+formatPhoneNumber(
+data.phone
+)
+
+
+
+
+const whatsappNumber =
+data.whatsapp
+?
+formatPhoneNumber(
+data.whatsapp
+)
+:
+null
+
+
+
+
+
+
+
+// EMAIL CHECK
 
 
 const {
@@ -347,9 +819,12 @@ data:existingUser
 
 }=await supabase
 
+
 .from('profiles')
 
+
 .select('email')
+
 
 .eq(
 
@@ -359,17 +834,24 @@ data.email
 
 )
 
+
 .maybeSingle()
+
+
+
 
 
 
 if(existingUser){
 
+
 toast.error(
 'Email already registered'
 )
 
+
 return
+
 
 }
 
@@ -377,18 +859,28 @@ return
 
 
 
-// BMDC check
+
+
+
+
+// BMDC CHECK
+
 
 
 const {
 
+
 data:existingDoctor
+
 
 }=await supabase
 
+
 .from('doctors')
 
+
 .select('bmdc_number')
+
 
 .eq(
 
@@ -398,58 +890,97 @@ data.bmdc_number
 
 )
 
+
 .maybeSingle()
+
+
+
+
 
 
 
 if(existingDoctor){
 
+
 toast.error(
 'BMDC number already registered'
 )
 
+
 return
+
 
 }
 
 
 
 
-// create auth
+
+
+
+
+
+// CREATE AUTH USER
+
 
 
 const {
 
+
 data:authData,
+
 
 error:authError
 
+
 }=await supabase.auth.signUp({
 
+
+
 email:data.email,
+
 
 password:data.password,
 
 
+
 options:{
+
+
 
 data:{
 
+
+
 name:data.name,
+
 
 role:'doctor',
 
-phone:data.phone,
 
-whatsapp:data.whatsapp,
+phone:phoneNumber,
+
+
+whatsapp:whatsappNumber,
+
 
 is_approved:false
 
-}
+
 
 }
+
+
+
+}
+
+
 
 })
+
+
+
+
 
 
 
@@ -460,42 +991,75 @@ throw authError
 
 
 
+
+
+
+
 if(authData.user){
 
 
 
-// profile
+
+
+
+
+// CREATE PROFILE
+
 
 
 const {
 
+
 error:profileError
+
 
 }=await supabase
 
+
+
 .from('profiles')
+
+
 
 .insert({
 
+
+
 id:authData.user.id,
+
 
 name:data.name,
 
+
 email:data.email,
 
-phone:data.phone,
 
-whatsapp:data.whatsapp,
+phone:phoneNumber,
+
+
+whatsapp:whatsappNumber,
+
 
 role:'doctor',
 
+
 district:data.district,
+
 
 upazila:data.upazila,
 
+
 is_approved:false
 
+
+
 })
+
+
+
+
+
+
 
 
 
@@ -505,36 +1069,70 @@ throw profileError
 
 
 
-// doctor record
+
+
+
+
+
+
+
+// CREATE DOCTOR RECORD
+
 
 
 const {
 
+
 error:doctorError
+
 
 }=await supabase
 
+
+
 .from('doctors')
+
+
 
 .insert({
 
+
+
 user_id:authData.user.id,
+
 
 bmdc_number:data.bmdc_number,
 
+
 speciality:data.speciality,
+
 
 degree:data.degree,
 
-experience:parseInt(data.experience),
 
-consultation_fee:parseFloat(data.consultation_fee),
+experience:
+Number(data.experience),
+
+
+
+consultation_fee:
+Number(data.consultation_fee),
+
+
 
 is_available:false,
 
+
 is_approved:false
 
+
+
 })
+
+
+
+
+
 
 
 
@@ -545,9 +1143,14 @@ throw doctorError
 
 
 
+
+
 toast.success(
-'Registration submitted'
+'Registration submitted successfully'
 )
+
+
+
 
 
 
@@ -557,46 +1160,101 @@ onClose()
 
 
 
+
+
+
+
+// AUTO LOGIN
+
+
+
 const {
+
 
 error:loginError
 
+
 }=await supabase.auth.signInWithPassword({
+
+
 
 email:data.email,
 
+
 password:data.password
+
+
 
 })
 
 
 
 
+
+
+
+
 if(!loginError){
+
 
 router.push(
 '/doctor/pending-approval'
 )
 
+
+
+router.refresh()
+
+
 }
 
 
 
+
+
+
+
+
 }
 
 
 
-} catch (error: unknown) {
-  console.error(error)
 
-  if (error instanceof Error) {
-    toast.error(error.message)
-  } else {
-    toast.error('Signup failed')
-  }
+}catch(error:unknown){
+
+
+
+console.error(
+'Doctor Signup Error:',
+error
+)
+
+
+
+
+
+if(error instanceof Error){
+
+
+toast.error(
+error.message
+)
+
+
+}else{
+
+
+toast.error(
+'Signup failed'
+)
+
+
 }
 
-finally{
+
+
+
+}finally{
 
 
 setIsLoading(false)
@@ -610,38 +1268,60 @@ setIsLoading(false)
 return (
 
 <form
-onSubmit={handleSubmit(onSubmit)}
+
+onSubmit={
+handleSubmit(onSubmit)
+}
+
 className="
 space-y-6
 max-h-[75vh]
 overflow-y-auto
 px-1
 "
+
 >
 
 
-{/* Doctor Information */}
+
+
+
+{/* DOCTOR INFORMATION */}
+
 
 <div>
 
 
 <div className="
-flex items-center gap-2 mb-4
+flex
+items-center
+gap-2
+mb-4
 ">
 
+
 <Stethoscope
+
 size={21}
+
 className="text-primary"
+
 />
+
 
 <h3 className="
 font-semibold
 text-teal-dark
 ">
+
 Doctor Information
+
 </h3>
 
+
 </div>
+
+
 
 
 
@@ -655,11 +1335,16 @@ gap-4
 
 
 
+
+
 <div>
 
 <label className="input-label">
+
 Doctor Name *
+
 </label>
+
 
 
 <div className="relative">
@@ -676,10 +1361,13 @@ placeholder="Dr. Md. Rahman"
 
 
 {...register(
+
 'name',
+
 {
-required:'Name is required'
+required:'Name required'
 }
+
 )}
 
 
@@ -694,19 +1382,9 @@ pl-10
 </div>
 
 
-{
-errors.name &&
-
-<p className="error-text">
-
-{errors.name.message}
-
-</p>
-
-}
-
-
 </div>
+
+
 
 
 
@@ -716,8 +1394,11 @@ errors.name &&
 
 
 <label className="input-label">
+
 Email *
+
 </label>
+
 
 
 <div className="relative">
@@ -734,10 +1415,13 @@ placeholder="doctor@email.com"
 
 
 {...register(
+
 'email',
+
 {
-required:'Email is required'
+required:'Email required'
 }
+
 )}
 
 
@@ -752,21 +1436,8 @@ pl-10
 </div>
 
 
-
-{
-errors.email &&
-
-<p className="error-text">
-
-{errors.email.message}
-
-</p>
-
-}
-
-
-
 </div>
+
 
 
 
@@ -777,8 +1448,11 @@ errors.email &&
 
 
 <label className="input-label">
+
 Phone *
+
 </label>
+
 
 
 <div className="relative">
@@ -791,14 +1465,17 @@ Phone *
 
 type="tel"
 
-placeholder="01712-345678"
+placeholder="017XXXXXXXX"
 
 
 {...register(
+
 'phone',
+
 {
-required:'Phone is required'
+required:'Phone required'
 }
+
 )}
 
 
@@ -814,16 +1491,137 @@ pl-10
 
 
 
+
+
 {
-errors.phone &&
+!otpSent &&
 
-<p className="error-text">
+<button
 
-{errors.phone.message}
+type="button"
+
+onClick={sendOTP}
+
+disabled={otpLoading}
+
+className="
+mt-3
+text-sm
+bg-teal-600
+text-white
+px-4
+py-2
+rounded-lg
+"
+
+>
+
+{
+
+otpLoading
+
+?
+
+'Sending...'
+
+:
+
+'Send OTP'
+
+}
+
+
+</button>
+
+}
+
+
+
+
+
+{
+otpSent && !otpVerified &&
+
+<div className="
+mt-3
+flex
+gap-2
+">
+
+
+<input
+
+type="text"
+
+maxLength={6}
+
+placeholder="Enter OTP"
+
+
+value={otp}
+
+
+onChange={(e)=>
+setOtp(e.target.value)
+}
+
+
+className="
+input-field
+"
+/>
+
+
+
+<button
+
+type="button"
+
+onClick={verifyOTP}
+
+className="
+bg-green-600
+text-white
+px-4
+rounded-lg
+"
+
+>
+
+Verify
+
+</button>
+
+
+</div>
+
+}
+
+
+
+
+{
+otpVerified &&
+
+<p className="
+text-green-600
+text-sm
+mt-2
+flex
+items-center
+gap-1
+">
+
+<ShieldCheck size={16}/>
+
+Phone Verified
 
 </p>
 
+
 }
+
+
 
 
 
@@ -833,11 +1631,17 @@ errors.phone &&
 
 
 
+
+
+
+
 <div>
 
 
 <label className="input-label">
+
 WhatsApp Number
+
 </label>
 
 
@@ -846,7 +1650,7 @@ WhatsApp Number
 
 type="tel"
 
-placeholder="01712-345678"
+placeholder="8801XXXXXXXXX"
 
 
 {...register(
@@ -854,13 +1658,19 @@ placeholder="01712-345678"
 )}
 
 
-className="input-field"
+className="
+input-field
+"
 
 />
 
 
-
 </div>
+
+
+
+
+
 
 
 
@@ -869,7 +1679,9 @@ className="input-field"
 
 
 <label className="input-label">
+
 BMDC Number *
+
 </label>
 
 
@@ -880,6 +1692,7 @@ BMDC Number *
 <BadgeCheck className="input-icon"/>
 
 
+
 <input
 
 type="text"
@@ -888,10 +1701,13 @@ placeholder="BMDC-12345"
 
 
 {...register(
+
 'bmdc_number',
+
 {
-required:'BMDC number required'
+required:'BMDC required'
 }
+
 )}
 
 
@@ -903,25 +1719,14 @@ pl-10
 />
 
 
+</div>
+
 
 </div>
 
 
 
-{
-errors.bmdc_number &&
 
-<p className="error-text">
-
-{errors.bmdc_number.message}
-
-</p>
-
-}
-
-
-
-</div>
 
 
 
@@ -931,66 +1736,88 @@ errors.bmdc_number &&
 
 
 <label className="input-label">
+
 Speciality *
+
 </label>
 
 
 
 <select
 
+
 {...register(
+
 'speciality',
+
 {
 required:'Speciality required'
 }
+
 )}
 
+
+
 className="input-field"
+
 
 >
 
 
 <option value="">
+
 Select speciality
+
 </option>
 
 
 
 {
+
 specialities.map(item=>(
 
+
 <option
+
 key={item}
+
 value={item}
+
 >
 
 {item}
 
 </option>
 
+
 ))
+
 }
+
 
 
 </select>
 
 
-
-</div>
-
-
-
-</div>
-
 </div>
 
 
 
 
 
+</div>
+
+</div>
 
 
-{/* Professional Details */}
+
+
+
+
+
+
+
+{/* PROFESSIONAL DETAILS */}
 
 
 
@@ -998,25 +1825,36 @@ value={item}
 
 
 <div className="
-flex items-center gap-2 mb-4
+flex
+items-center
+gap-2
+mb-4
 ">
 
 
 <GraduationCap
+
 size={21}
+
 className="text-primary"
+
 />
+
 
 
 <h3 className="
 font-semibold
 text-teal-dark
 ">
+
 Professional Details
+
 </h3>
 
 
 </div>
+
+
 
 
 
@@ -1031,23 +1869,19 @@ gap-4
 
 
 
-<div>
-
-
-<label className="input-label">
-Degree *
-</label>
-
 
 
 <select
 
 
 {...register(
+
 'degree',
+
 {
 required:'Degree required'
 }
+
 )}
 
 
@@ -1057,16 +1891,22 @@ className="input-field"
 
 
 <option value="">
-Select degree
+
+Select Degree
+
 </option>
 
 
 {
+
 degrees.map(item=>(
 
 <option
+
 key={item}
+
 value={item}
+
 >
 
 {item}
@@ -1074,39 +1914,39 @@ value={item}
 </option>
 
 ))
+
 }
+
 
 
 </select>
 
 
-</div>
 
 
 
-
-
-<div>
-
-
-<label className="input-label">
-Experience (Years) *
-</label>
 
 
 <input
 
+
 type="number"
 
-placeholder="5"
+
+placeholder="Experience Years"
+
 
 
 {...register(
+
 'experience',
+
 {
 required:'Experience required'
 }
+
 )}
+
 
 
 className="input-field"
@@ -1115,55 +1955,38 @@ className="input-field"
 
 
 
-</div>
 
 
 
-
-
-<div>
-
-
-<label className="input-label">
-Consultation Fee (৳) *
-</label>
-
-
-
-<div className="relative">
-
-<Wallet className="input-icon"/>
 
 
 <input
 
+
 type="number"
 
-placeholder="800"
+
+placeholder="Consultation Fee"
+
 
 
 {...register(
+
 'consultation_fee',
+
 {
 required:'Fee required'
 }
+
 )}
 
 
-className="
-input-field
-pl-10
-"
+
+className="input-field"
 
 />
 
 
-</div>
-
-
-
-</div>
-
 
 
 </div>
@@ -1178,7 +2001,8 @@ pl-10
 
 
 
-{/* Location */}
+
+{/* LOCATION */}
 
 
 
@@ -1186,25 +2010,36 @@ pl-10
 
 
 <div className="
-flex items-center gap-2 mb-4
+flex
+items-center
+gap-2
+mb-4
 ">
 
 
 <MapPin
+
 size={21}
+
 className="text-primary"
+
 />
+
 
 
 <h3 className="
 font-semibold
 text-teal-dark
 ">
+
 Clinic Location
+
 </h3>
 
 
+
 </div>
+
 
 
 
@@ -1219,34 +2054,28 @@ gap-4
 
 
 
-<div>
-
-
-<label className="input-label">
-District *
-</label>
 
 
 <select
 
 
 {...register(
+
 'district',
+
 {
 required:'District required'
 }
+
 )}
 
 
 
-onChange={(e)=>{
-
+onChange={(e)=>
 setSelectedDistrict(
 e.target.value
 )
-
-}}
-
+}
 
 
 className="input-field"
@@ -1254,11 +2083,11 @@ className="input-field"
 >
 
 
-
 <option value="">
-Select District
-</option>
 
+Select District
+
+</option>
 
 
 {
@@ -1277,40 +2106,32 @@ value={item.id}
 
 </option>
 
+
 ))
 
 }
-
 
 
 </select>
 
 
 
-</div>
 
 
-
-
-
-<div>
-
-
-<label className="input-label">
-Upazila *
-</label>
 
 
 <select
 
 
 {...register(
+
 'upazila',
+
 {
 required:'Upazila required'
 }
-)}
 
+)}
 
 
 disabled={!selectedDistrict}
@@ -1322,12 +2143,14 @@ input-field
 disabled:bg-gray-100
 "
 
+
 >
 
 
-
 <option value="">
+
 Select Upazila
+
 </option>
 
 
@@ -1347,6 +2170,7 @@ value={item.id}
 
 </option>
 
+
 ))
 
 }
@@ -1357,15 +2181,11 @@ value={item.id}
 
 
 
-</div>
-
-
-
-</div>
 
 
 </div>
 
+</div>
 
 
 
@@ -1373,7 +2193,9 @@ value={item.id}
 
 
 
-{/* Security */}
+
+
+{/* SECURITY */}
 
 
 
@@ -1381,21 +2203,30 @@ value={item.id}
 
 
 <div className="
-flex items-center gap-2 mb-4
+flex
+items-center
+gap-2
+mb-4
 ">
 
 
 <Lock
+
 size={21}
+
 className="text-primary"
+
 />
+
 
 
 <h3 className="
 font-semibold
 text-teal-dark
 ">
+
 Account Security
+
 </h3>
 
 
@@ -1419,20 +2250,27 @@ gap-4
 
 type="password"
 
+
 placeholder="Password"
 
 
+
 {...register(
+
 'password',
+
 {
 required:'Password required'
 }
+
 )}
+
 
 
 className="input-field"
 
 />
+
 
 
 
@@ -1443,15 +2281,21 @@ className="input-field"
 
 type="password"
 
+
 placeholder="Confirm Password"
 
 
+
 {...register(
+
 'confirmPassword',
+
 {
-required:'Confirm password'
+required:'Confirm password required'
 }
+
 )}
+
 
 
 className="input-field"
@@ -1461,10 +2305,14 @@ className="input-field"
 
 
 
+
+
 </div>
 
 
 </div>
+
+
 
 
 
@@ -1474,33 +2322,24 @@ className="input-field"
 
 <button
 
+
 type="submit"
+
 
 disabled={isLoading}
 
 
+
 className="
-
 w-full
-
 bg-primary
-
 hover:bg-primary-dark
-
 text-white
-
 py-3.5
-
 rounded-xl
-
 font-semibold
-
-transition
-
 shadow-lg
-
 disabled:opacity-50
-
 "
 
 >
@@ -1527,20 +2366,27 @@ isLoading
 
 
 
+
+
 <p className="
 text-center
 text-sm
 text-text-grey
 ">
 
+
 Your account will be reviewed by Quick Treat admin before approval.
+
 
 </p>
 
 
 
 
+
+
 </form>
+
 
 )
 

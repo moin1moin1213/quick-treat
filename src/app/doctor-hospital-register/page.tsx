@@ -12,20 +12,27 @@ import RegisterFooter from '@/components/register/RegisterFooter'
 
 export default function DoctorHospitalRegisterPage(){
 
+
   const router = useRouter()
 
-  const [type,setType] = useState<'doctor'|'hospital'>('doctor')
+
+  const [type,setType] =
+  useState<'doctor'|'hospital'>('doctor')
+
 
 
   return (
 
-    <div className="
+    <div
+    className="
     min-h-screen
     bg-linear-to-b
     from-teal-50
     via-white
     to-white
-    ">
+    "
+    >
+
 
 
       <RegisterHeader
@@ -34,28 +41,40 @@ export default function DoctorHospitalRegisterPage(){
 
 
 
-      <main className="
+
+
+      <main
+      className="
       px-4
       sm:px-6
       lg:px-8
       py-10
-      ">
+      "
+      >
 
 
-        <div className="
+        <div
+        className="
         max-w-4xl
         mx-auto
-        ">
+        "
+        >
 
 
 
-          <div className="
+
+
+          <div
+          className="
           text-center
           mb-8
-          ">
+          "
+          >
 
 
-            <div className="
+
+            <div
+            className="
             w-20
             h-20
             mx-auto
@@ -66,27 +85,43 @@ export default function DoctorHospitalRegisterPage(){
             justify-center
             text-4xl
             mb-5
-            ">
+            "
+            >
+
               🏥
+
             </div>
 
 
-            <h1 className="
+
+
+            <h1
+            className="
             text-3xl
             sm:text-4xl
             font-bold
             text-teal-800
-            ">
+            "
+            >
+
               Join Quick Treat
+
             </h1>
 
 
-            <p className="
+
+
+            <p
+            className="
             mt-3
             text-slate-500
-            ">
+            "
+            >
+
               Register as doctor or healthcare facility
+
             </p>
+
 
 
           </div>
@@ -94,9 +129,14 @@ export default function DoctorHospitalRegisterPage(){
 
 
 
-          {/* Switch */}
 
-          <div className="
+
+
+          {/* ROLE SWITCH */}
+
+
+          <div
+          className="
           bg-white
           rounded-2xl
           shadow-md
@@ -105,65 +145,84 @@ export default function DoctorHospitalRegisterPage(){
           p-2
           flex
           mb-6
-          ">
+          "
+          >
+
+
 
 
             <button
 
-              onClick={()=>setType('doctor')}
+            type="button"
 
-              className={`
-              flex-1
-              py-3
-              rounded-xl
-              font-semibold
-              transition
+            onClick={()=>
+              setType('doctor')
+            }
 
-              ${
-              type==='doctor'
-              ?
-              'bg-teal-600 text-white'
-              :
-              'text-slate-500 hover:bg-teal-50'
-              }
+            className={`
+            flex-1
+            py-3
+            rounded-xl
+            font-semibold
+            transition
 
-              `}
+            ${
+            type==='doctor'
+            ?
+            'bg-teal-600 text-white'
+            :
+            'text-slate-500 hover:bg-teal-50'
+            }
+
+            `}
 
             >
 
               👨‍⚕️ Doctor
 
+
             </button>
+
+
+
 
 
 
 
             <button
 
-              onClick={()=>setType('hospital')}
+            type="button"
 
-              className={`
-              flex-1
-              py-3
-              rounded-xl
-              font-semibold
-              transition
+            onClick={()=>
+              setType('hospital')
+            }
 
-              ${
-              type==='hospital'
-              ?
-              'bg-teal-600 text-white'
-              :
-              'text-slate-500 hover:bg-teal-50'
-              }
 
-              `}
+            className={`
+            flex-1
+            py-3
+            rounded-xl
+            font-semibold
+            transition
+
+            ${
+            type==='hospital'
+            ?
+            'bg-teal-600 text-white'
+            :
+            'text-slate-500 hover:bg-teal-50'
+            }
+
+            `}
 
             >
 
               🏥 Hospital
 
+
             </button>
+
+
 
 
           </div>
@@ -172,7 +231,13 @@ export default function DoctorHospitalRegisterPage(){
 
 
 
-          <div className="
+
+
+
+
+          <div
+
+          className="
           bg-white
           rounded-3xl
           shadow-xl
@@ -180,39 +245,69 @@ export default function DoctorHospitalRegisterPage(){
           border-teal-100
           p-5
           sm:p-8
-          ">
+          "
+
+          >
+
 
 
           {
-            type==='doctor'
-            ?
-            <DoctorSignup
-              onClose={()=>router.push('/doctor/pending-approval')}
-            />
 
-            :
+          type === 'doctor'
 
-            <HospitalSignup
-              onClose={()=>router.push('/hospital/pending-approval')}
-            />
+          ?
+
+          <DoctorSignup
+
+          onClose={()=>
+          router.push(
+          '/doctor/pending-approval'
+          )
           }
+
+          />
+
+
+          :
+
+
+          <HospitalSignup
+
+          onClose={()=>
+          router.push(
+          '/hospital/pending-approval'
+          )
+          }
+
+          />
+
+
+          }
+
 
 
           </div>
 
 
 
+
+
         </div>
+
 
 
       </main>
 
 
+
+
+
       <RegisterFooter/>
 
 
-    </div>
 
+
+    </div>
 
   )
 

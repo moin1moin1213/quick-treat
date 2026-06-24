@@ -1,87 +1,222 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client'
+
+import {
+useState,
+useEffect
+} from 'react'
+
+
+import {
+useForm
+} from 'react-hook-form'
+
+
+import {
+useRouter
+} from 'next/navigation'
+
+
+import {
+supabase
+} from '@/lib/supabase/client'
+
+
 import toast from 'react-hot-toast'
+
+
+
 
 
 interface HospitalSignupForm {
 
-  hospital_name:string
-  dghs_license:string
 
-  email:string
-  phone:string
-  whatsapp_number:string
+hospital_name:string
 
-  district:string
-  upazila:string
 
-  address:string
+dghs_license:string
 
-  password:string
-  confirmPassword:string
+
+email:string
+
+
+phone:string
+
+
+whatsapp_number:string
+
+
+district:string
+
+
+upazila:string
+
+
+address:string
+
+
+password:string
+
+
+confirmPassword:string
+
 
 }
+
+
+
 
 
 
 interface District {
 
-  id:number
-  name:string
+
+id:number
+
+name:string
+
 
 }
+
+
+
 
 
 
 interface Upazila {
 
-  id:number
-  name:string
+
+id:number
+
+name:string
+
 
 }
 
 
 
+
+
+
+
+
 export default function HospitalSignup({
 
-  onClose
+
+onClose
+
 
 }:{
 
-  onClose:()=>void
+
+onClose:()=>void
+
 
 }){
+
+
+
+
+
 
 
 const router = useRouter()
 
 
 
-const [isLoading,setIsLoading]=useState(false)
 
 
-const [districts,setDistricts]=useState<District[]>([])
+
+const [isLoading,setIsLoading] =
+useState(false)
+
+
+
+
+
+// =======================
+// OTP STATES
+// =======================
+
+
+const [otp,setOtp] =
+useState('')
+
+
+
+const [otpSent,setOtpSent] =
+useState(false)
+
+
+
+const [otpVerified,setOtpVerified] =
+useState(false)
+
+
+
+const [otpLoading,setOtpLoading] =
+useState(false)
+
+
+
+const [resendTime,setResendTime] =
+useState(0)
+
+
+
+
+
+
+
+
+const [verifiedPhone,setVerifiedPhone] =
+useState('')
+
+
+
+
+
+
+
+
+
+// =======================
+// LOCATION STATES
+// =======================
+
+
+
+const [districts,setDistricts] =
+useState<District[]>([])
+
 
 
 const [upazilas,setUpazilas]=useState<Upazila[]>([])
 
 
-const [selectedDistrict,setSelectedDistrict]=useState('')
+
+const [selectedDistrict,setSelectedDistrict] =
+useState('')
+
+
+
+
+
 
 
 
 
 const {
 
- register,
 
- handleSubmit,
+register,
 
- formState:{errors}
+
+handleSubmit,
+
+
+formState:{errors}
+
 
 }=useForm<HospitalSignupForm>()
 
@@ -89,82 +224,534 @@ const {
 
 
 
-// Fetch district
-
-
-const fetchDistricts=async()=>{
-
-
-const {
-
- data,
-
- error
-
-}=await supabase
-
-.from('districts')
-
-.select('id,name')
-
-.order('name')
 
 
 
-if(!error){
 
- setDistricts(data || [])
 
-}
+// =======================
+// PHONE FORMAT
+// =======================
+
+
+const formatPhone=(phone:string)=>{
+
+
+const number =
+phone.replace(/\D/g,'')
+
+
+
+if(number.startsWith('8801')){
+
+
+return number
 
 
 }
 
 
 
+if(number.startsWith('01')){
+
+
+return '88'+number
+
+
+}
 
 
 
-// Fetch upazila
+return number
 
 
-const fetchUpazilas=async(
+}
 
-districtId:string
 
-)=>{
+
+
+
+
+
+
+
+
+
+// =======================
+// SEND OTP
+// =======================
+
+
+
+const sendOTP=async()=>{
+
+
+const phoneValue =
+formatPhone(
+(document.querySelector(
+'#hospital-phone'
+) as HTMLInputElement)?.value || ''
+)
+
+
+
+
+
+if(!phoneValue.startsWith('8801')){
+
+
+toast.error(
+'Invalid Bangladesh phone number'
+)
+
+
+return
+
+}
+
+
+
+
+
+setOtpLoading(true)
+
+
+
+
+try{
+
+
+
+const response =
+await fetch(
+'/api/send-otp',
+{
+
+
+method:'POST',
+
+
+headers:{
+
+
+'Content-Type':
+'application/json'
+
+
+},
+
+
+
+body:JSON.stringify({
+
+
+phone:phoneValue
+
+
+})
+
+
+}
+
+)
+
+
+
+
+
+
+const result =
+await response.json()
+
+
+
+
+
+
+if(!response.ok){
+
+
+throw new Error(
+result.error ||
+'OTP send failed'
+)
+
+
+}
+
+
+
+
+
+setOtpSent(true)
+
+
+
+setVerifiedPhone(phoneValue)
+
+
+
+setResendTime(60)
+
+
+
+toast.success(
+'OTP sent successfully'
+)
+
+
+
+
+
+}
+
+catch(error){
+
+
+
+console.error(
+error
+)
+
+
+
+toast.error(
+'OTP send failed'
+)
+
+
+
+}
+
+finally{
+
+
+setOtpLoading(false)
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+// =======================
+// VERIFY OTP
+// =======================
+
+
+
+const verifyOTP=async()=>{
+
+
+
+if(!otp){
+
+
+toast.error(
+'Enter OTP'
+)
+
+
+return
+
+
+}
+
+
+
+
+
+try{
+
+
+
+const response =
+await fetch(
+'/api/verify-otp',
+{
+
+
+method:'POST',
+
+
+headers:{
+
+
+'Content-Type':
+'application/json'
+
+
+},
+
+
+
+body:JSON.stringify({
+
+
+phone:verifiedPhone,
+
+
+otp
+
+
+})
+
+
+}
+
+)
+
+
+
+
+
+
+const result =
+await response.json()
+
+
+
+
+
+if(!response.ok){
+
+
+throw new Error(
+result.error ||
+'OTP verification failed'
+)
+
+
+}
+
+
+
+
+
+
+
+setOtpVerified(true)
+
+
+
+toast.success(
+'Phone verified successfully'
+)
+
+
+
+
+
+
+
+}
+
+catch(error){
+
+
+
+console.error(
+error
+)
+
+
+
+toast.error(
+'Invalid OTP'
+)
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =======================
+// RESEND TIMER
+// =======================
+
+
+useEffect(()=>{
+
+
+if(resendTime<=0)
+return
+
+
+
+
+const timer =
+setTimeout(()=>{
+
+
+setResendTime(
+prev=>prev-1
+)
+
+
+},1000)
+
+
+
+
+
+return ()=>clearTimeout(timer)
+
+
+
+
+},[resendTime])
+
+
+
+
+
+
+
+
+
+// =======================
+// FETCH DISTRICT
+// =======================
+
+
+
+const fetchDistricts =
+async()=>{
 
 
 const {
+
 
 data,
 
 error
 
+
 }=await supabase
+
+
+.from('districts')
+
+
+.select(
+'id,name'
+)
+
+
+.order(
+'name'
+)
+
+
+
+
+
+if(!error){
+
+
+setDistricts(
+data || []
+)
+
+
+}
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =======================
+// FETCH UPAZILA
+// =======================
+
+
+
+const fetchUpazilas =
+async(
+districtId:string
+)=>{
+
+
+
+const {
+
+
+data,
+
+error
+
+
+}=await supabase
+
 
 .from('upazilas')
 
-.select('id,name')
+
+.select(
+'id,name'
+)
+
 
 .eq(
 'district_id',
 Number(districtId)
 )
 
-.order('name')
+
+.order(
+'name'
+)
+
+
 
 
 
 if(!error){
 
-setUpazilas(data || [])
+
+setUpazilas(
+data || []
+)
+
 
 }
 
 
 
 }
+
+
 
 
 
@@ -174,9 +761,14 @@ setUpazilas(data || [])
 
 useEffect(()=>{
 
+
 fetchDistricts()
 
+
 },[])
+
+
+
 
 
 
@@ -187,30 +779,54 @@ useEffect(()=>{
 
 if(selectedDistrict){
 
-fetchUpazilas(selectedDistrict)
 
-}else{
+fetchUpazilas(
+selectedDistrict
+)
+
+
+}
+
+else{
+
 
 setUpazilas([])
 
+
 }
+
+
 
 
 },[selectedDistrict])
 
 
+// =======================
+// SUBMIT
+// =======================
 
 
-
-
-
-
-
-const onSubmit=async(
-
+const onSubmit = async(
 data:HospitalSignupForm
-
 )=>{
+
+
+
+if(!otpVerified){
+
+
+toast.error(
+'Please verify phone number first'
+)
+
+
+return
+
+
+}
+
+
+
 
 
 
@@ -226,6 +842,7 @@ return
 
 
 }
+
 
 
 
@@ -246,7 +863,9 @@ return
 
 
 
+
 setIsLoading(true)
+
 
 
 
@@ -257,23 +876,32 @@ try{
 
 
 
-// Email check
+// =======================
+// EMAIL CHECK
+// =======================
+
 
 
 const {
 
+
 data:existingUser
+
 
 }=await supabase
 
+
 .from('profiles')
 
+
 .select('email')
+
 
 .eq(
 'email',
 data.email
 )
+
 
 .maybeSingle()
 
@@ -300,25 +928,37 @@ return
 
 
 
-// DGHS check
+
+
+// =======================
+// DGHS CHECK
+// =======================
+
 
 
 const {
 
+
 data:existingHospital
+
 
 }=await supabase
 
+
 .from('hospitals')
 
+
 .select('dghs_license')
+
 
 .eq(
 'dghs_license',
 data.dghs_license
 )
 
+
 .maybeSingle()
+
 
 
 
@@ -346,14 +986,20 @@ return
 
 
 
-// Create auth user
+// =======================
+// CREATE AUTH
+// =======================
+
 
 
 const {
 
+
 data:authData,
 
+
 error:authError
+
 
 }=await supabase.auth.signUp({
 
@@ -369,7 +1015,9 @@ password:data.password,
 options:{
 
 
+
 data:{
+
 
 
 name:data.hospital_name,
@@ -378,7 +1026,7 @@ name:data.hospital_name,
 role:'hospital',
 
 
-phone:data.phone,
+phone:verifiedPhone,
 
 
 is_approved:false
@@ -386,6 +1034,7 @@ is_approved:false
 
 
 }
+
 
 
 }
@@ -399,11 +1048,16 @@ is_approved:false
 
 
 
+
 if(authError){
+
 
 throw authError
 
+
 }
+
+
 
 
 
@@ -412,9 +1066,11 @@ throw authError
 
 if(!authData.user){
 
+
 throw new Error(
 'Account creation failed'
 )
+
 
 }
 
@@ -422,7 +1078,11 @@ throw new Error(
 
 
 
-const userId=authData.user.id
+
+
+
+const userId =
+authData.user.id
 
 
 
@@ -431,18 +1091,29 @@ const userId=authData.user.id
 
 
 
-// Insert profile
+
+
+
+// =======================
+// PROFILE INSERT
+// =======================
+
 
 
 const {
 
+
 error:profileError
+
 
 }=await supabase
 
+
 .from('profiles')
 
+
 .insert({
+
 
 
 id:userId,
@@ -454,7 +1125,7 @@ name:data.hospital_name,
 email:data.email,
 
 
-phone:data.phone,
+phone:verifiedPhone,
 
 
 whatsapp:data.whatsapp_number,
@@ -472,7 +1143,9 @@ upazila:data.upazila,
 is_approved:false
 
 
+
 })
+
 
 
 
@@ -481,7 +1154,9 @@ is_approved:false
 
 if(profileError){
 
+
 throw profileError
+
 
 }
 
@@ -493,16 +1168,25 @@ throw profileError
 
 
 
-// Insert hospital data
+
+
+// =======================
+// HOSPITAL INSERT
+// =======================
+
 
 
 const {
 
+
 error:hospitalError
+
 
 }=await supabase
 
+
 .from('hospitals')
+
 
 .insert({
 
@@ -511,25 +1195,33 @@ error:hospitalError
 id:userId,
 
 
+
 dghs_license:data.dghs_license,
+
 
 
 whatsapp_number:data.whatsapp_number,
 
 
+
 address:data.address,
+
 
 
 total_beds:0,
 
 
+
 available_beds:0,
+
 
 
 has_oxygen:false,
 
 
+
 has_ot:false,
+
 
 
 is_approved:false
@@ -544,9 +1236,12 @@ is_approved:false
 
 
 
+
 if(hospitalError){
 
+
 throw hospitalError
+
 
 }
 
@@ -557,11 +1252,16 @@ throw hospitalError
 
 
 
+
+
 toast.success(
 
-'Registration submitted successfully'
+'Hospital registration submitted'
 
 )
+
+
+
 
 
 
@@ -575,17 +1275,27 @@ onClose()
 
 
 
-// Auto login
+
+
+
+// =======================
+// AUTO LOGIN
+// =======================
+
 
 
 const {
 
+
 error:loginError
+
 
 }=await supabase.auth.signInWithPassword({
 
 
+
 email:data.email,
+
 
 
 password:data.password
@@ -599,12 +1309,15 @@ password:data.password
 
 
 
+
 if(!loginError){
+
 
 
 router.push(
 '/hospital/pending-approval'
 )
+
 
 
 }
@@ -614,19 +1327,48 @@ router.push(
 
 
 
-} catch (error: unknown) {
 
-  console.error(error)
 
-  if (error instanceof Error) {
-    toast.error(error.message)
-  } else {
-    toast.error('Registration failed')
-  }
+}
 
-} finally {
+catch(error:unknown){
 
-  setIsLoading(false)
+
+
+console.error(error)
+
+
+
+if(error instanceof Error){
+
+
+toast.error(
+error.message
+)
+
+
+}
+
+else{
+
+
+toast.error(
+'Registration failed'
+)
+
+
+}
+
+
+
+
+}
+
+finally{
+
+
+setIsLoading(false)
+
 
 }
 
@@ -636,23 +1378,30 @@ router.push(
 return (
 
 <form
-  onSubmit={handleSubmit(onSubmit)}
-  className="space-y-5"
+onSubmit={
+handleSubmit(onSubmit)
+}
+className="
+space-y-5
+"
 >
 
 
-<div className="
+<div
+className="
 grid
 grid-cols-1
 md:grid-cols-2
 gap-4
-">
+"
+>
 
 
 
 {/* Hospital Name */}
 
 <div className="md:col-span-2">
+
 
 <label className="form-label">
 Hospital Name *
@@ -664,7 +1413,7 @@ Hospital Name *
 {...register(
 'hospital_name',
 {
-required:'Hospital name is required'
+required:'Hospital name required'
 }
 )}
 
@@ -689,9 +1438,13 @@ errors.hospital_name &&
 
 
 
-{/* DGHS License */}
+
+
+
+{/* DGHS */}
 
 <div>
+
 
 <label className="form-label">
 DGHS License Number *
@@ -700,6 +1453,7 @@ DGHS License Number *
 
 <input
 
+
 {...register(
 'dghs_license',
 {
@@ -707,13 +1461,20 @@ required:'DGHS license required'
 }
 )}
 
+
 placeholder="DGHS-12345"
+
 
 className="form-input"
 
+
 />
 
+
 </div>
+
+
+
 
 
 
@@ -724,6 +1485,7 @@ className="form-input"
 
 <div>
 
+
 <label className="form-label">
 Email *
 </label>
@@ -731,7 +1493,9 @@ Email *
 
 <input
 
+
 type="email"
+
 
 {...register(
 'email',
@@ -740,9 +1504,12 @@ required:'Email required'
 }
 )}
 
-placeholder="hospital@example.com"
+
+placeholder="hospital@email.com"
+
 
 className="form-input"
+
 
 />
 
@@ -755,18 +1522,45 @@ className="form-input"
 
 
 
-{/* Phone */}
+
+
+{/* Phone + OTP */}
+
 
 <div>
+
 
 <label className="form-label">
 Phone Number *
 </label>
 
 
+
+<div
+className="
+flex
+gap-2
+"
+>
+
+
 <input
 
+
+id="hospital-phone"
+
+
 type="tel"
+
+
+placeholder="8801712345678"
+
+
+className="
+form-input
+flex-1
+"
+
 
 {...register(
 'phone',
@@ -775,11 +1569,69 @@ required:'Phone required'
 }
 )}
 
-placeholder="02-XXXXXXX"
-
-className="form-input"
 
 />
+
+
+
+
+<button
+
+
+type="button"
+
+
+onClick={sendOTP}
+
+
+disabled={
+otpLoading ||
+resendTime>0
+}
+
+
+className="
+bg-teal-600
+text-white
+px-4
+rounded-lg
+text-sm
+disabled:opacity-50
+"
+
+
+>
+
+
+{
+
+otpLoading
+
+?
+
+'Sending'
+
+:
+
+resendTime>0
+
+?
+
+`${resendTime}s`
+
+:
+
+'Send OTP'
+
+}
+
+
+</button>
+
+
+
+</div>
+
 
 
 </div>
@@ -791,9 +1643,119 @@ className="form-input"
 
 
 
-{/* Whatsapp */}
+
+{/* OTP */}
+
+
+{
+otpSent &&
 
 <div>
+
+
+<label className="form-label">
+Enter OTP *
+</label>
+
+
+
+<div
+className="
+flex
+gap-2
+"
+>
+
+
+<input
+
+
+type="text"
+
+
+maxLength={6}
+
+
+value={otp}
+
+
+onChange={
+e=>setOtp(e.target.value)
+}
+
+
+placeholder="123456"
+
+
+className="
+form-input
+flex-1
+"
+
+
+/>
+
+
+
+
+<button
+
+
+type="button"
+
+
+onClick={verifyOTP}
+
+
+disabled={otpVerified}
+
+
+className="
+bg-green-600
+text-white
+px-4
+rounded-lg
+disabled:opacity-50
+"
+
+
+>
+
+
+{
+
+otpVerified
+
+?
+
+'Verified ✓'
+
+:
+
+'Verify'
+
+}
+
+
+</button>
+
+
+</div>
+
+
+</div>
+
+}
+
+
+
+
+
+{/* Whatsapp */}
+
+
+<div>
+
 
 <label className="form-label">
 WhatsApp Number
@@ -802,15 +1764,20 @@ WhatsApp Number
 
 <input
 
+
 type="tel"
+
+
+placeholder="8801712345678"
+
 
 {...register(
 'whatsapp_number'
 )}
 
-placeholder="01712-345678"
 
 className="form-input"
+
 
 />
 
@@ -826,7 +1793,9 @@ className="form-input"
 
 {/* District */}
 
+
 <div>
+
 
 <label className="form-label">
 District *
@@ -844,14 +1813,17 @@ required:'District required'
 )}
 
 
-onChange={(e)=>
-setSelectedDistrict(
+
+onChange={
+e=>setSelectedDistrict(
 e.target.value
 )
 }
 
 
+
 className="form-input"
+
 
 >
 
@@ -861,9 +1833,11 @@ Select District
 </option>
 
 
+
 {
 
 districts.map(item=>(
+
 
 <option
 
@@ -883,6 +1857,7 @@ value={item.id}
 }
 
 
+
 </select>
 
 
@@ -895,12 +1870,15 @@ value={item.id}
 
 
 
+
 {/* Upazila */}
+
 
 <div>
 
+
 <label className="form-label">
-Upazila / Thana *
+Upazila *
 </label>
 
 
@@ -932,8 +1910,8 @@ Select Upazila
 </option>
 
 
-{
 
+{
 
 upazilas.map(item=>(
 
@@ -957,6 +1935,7 @@ value={item.id}
 }
 
 
+
 </select>
 
 
@@ -969,7 +1948,9 @@ value={item.id}
 
 
 
+
 {/* Address */}
+
 
 <div className="md:col-span-2">
 
@@ -993,10 +1974,14 @@ required:'Address required'
 )}
 
 
-placeholder="Hospital address"
+placeholder="Hospital full address"
 
 
-className="form-input resize-none"
+className="
+form-input
+resize-none
+"
+
 
 />
 
@@ -1012,6 +1997,7 @@ className="form-input resize-none"
 
 
 {/* Password */}
+
 
 <div>
 
@@ -1053,8 +2039,8 @@ className="form-input"
 
 
 
-
 {/* Confirm Password */}
+
 
 <div>
 
@@ -1093,7 +2079,9 @@ className="form-input"
 
 
 
+
 </div>
+
 
 
 
@@ -1105,7 +2093,9 @@ className="form-input"
 
 <button
 
+
 type="submit"
+
 
 disabled={isLoading}
 
@@ -1128,6 +2118,7 @@ disabled:opacity-50
 
 {
 
+
 isLoading
 
 ?
@@ -1137,6 +2128,7 @@ isLoading
 :
 
 'Register Hospital'
+
 
 }
 
@@ -1149,14 +2141,18 @@ isLoading
 
 
 
-<p className="
+<p
+
+className="
 text-center
 text-sm
 text-gray-500
-">
+"
+
+>
 
 
-Your hospital registration will be reviewed by admin before approval.
+Your hospital account will be reviewed by Quick Treat admin before approval.
 
 
 </p>
@@ -1165,8 +2161,8 @@ Your hospital registration will be reviewed by admin before approval.
 
 
 
-</form>
 
+</form>
 
 )
 
