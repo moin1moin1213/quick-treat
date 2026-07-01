@@ -2,8 +2,7 @@
 
 
 import {
-useState,
-useEffect
+useState
 } from 'react'
 
 
@@ -25,7 +24,6 @@ supabase
 import toast from 'react-hot-toast'
 
 
-
 import {
 User,
 Mail,
@@ -33,11 +31,19 @@ Phone,
 Stethoscope,
 GraduationCap,
 MapPin,
-Lock,
 BadgeCheck,
-
 ShieldCheck
+
 } from 'lucide-react'
+
+
+
+import {
+
+districts
+
+} from '@/components/data/bangladesh-location'
+
 
 
 
@@ -48,27 +54,42 @@ interface DoctorSignupForm {
 
 name:string
 
+
 email:string
+
 
 phone:string
 
+
 whatsapp:string
+
 
 bmdc_number:string
 
+
 speciality:string
+
 
 degree:string
 
+
 experience:string
+
 
 consultation_fee:string
 
+
 district:string
+
 
 upazila:string
 
+
+address:string
+
+
 password:string
+
 
 confirmPassword:string
 
@@ -80,30 +101,23 @@ confirmPassword:string
 
 
 
-interface District{
+
+interface LocationDistrict {
 
 
 id:number
 
+
 name:string
+
+
+upazilas:string[]
 
 
 }
 
 
 
-
-
-
-interface Upazila{
-
-
-id:number
-
-name:string
-
-
-}
 
 
 
@@ -116,25 +130,36 @@ const specialities=[
 
 'Cardiologist',
 
+
 'Neurologist',
+
 
 'Orthopedic',
 
+
 'Pediatrician',
+
 
 'Gynecologist',
 
+
 'Dermatologist',
+
 
 'Psychiatrist',
 
+
 'ENT Specialist',
+
 
 'Ophthalmologist',
 
+
 'Dentist',
 
+
 'Urologist',
+
 
 'Gastroenterologist'
 
@@ -147,22 +172,30 @@ const specialities=[
 
 
 
+
 const degrees=[
 
 
 'MBBS',
 
+
 'MD',
+
 
 'MS',
 
+
 'FCPS',
+
 
 'BDS',
 
+
 'MDS',
 
+
 'PhD',
+
 
 'FRCS'
 
@@ -195,26 +228,10 @@ onClose:()=>void
 
 
 
-const router = useRouter()
 
 
-
-
-
-
-const [isLoading,setIsLoading]=useState(false)
-
-
-
-
-
-const [districts,setDistricts]=useState<District[]>([])
-
-
-const [upazilas,setUpazilas]=useState<Upazila[]>([])
-
-
-const [selectedDistrict,setSelectedDistrict]=useState('')
+const router =
+useRouter()
 
 
 
@@ -222,25 +239,66 @@ const [selectedDistrict,setSelectedDistrict]=useState('')
 
 
 
-// OTP STATE
 
-
-const [otpSent,setOtpSent]=useState(false)
-
-
-const [otpVerified,setOtpVerified]=useState(false)
-
-
-const [otp,setOtp]=useState('')
-
-
-const [otpLoading,setOtpLoading]=useState(false)
+const [isLoading,setIsLoading]=
+useState(false)
 
 
 
 
 
-const [generatedOtp,setGeneratedOtp]=useState('')
+
+
+
+// =======================
+// LOCATION
+// =======================
+
+
+
+const [selectedDistrict,setSelectedDistrict]=
+useState<LocationDistrict | null>(null)
+
+
+
+const [upazilas,setUpazilas]=
+useState<string[]>([])
+
+
+
+
+
+
+
+
+// =======================
+// OTP
+// =======================
+
+
+
+const [otpSent,setOtpSent]=
+useState(false)
+
+
+
+const [otpVerified,setOtpVerified]=
+useState(false)
+
+
+
+const [otp,setOtp]=
+useState('')
+
+
+
+const [otpLoading,setOtpLoading]=
+useState(false)
+
+
+
+const [generatedOtp,setGeneratedOtp]=
+useState('')
 
 
 
@@ -259,8 +317,7 @@ register,
 handleSubmit,
 
 
-getValues,
-
+getValues
 
 
 
@@ -274,22 +331,23 @@ getValues,
 
 
 
-// ================================
-// PHONE FORMAT
-// 017XXXXXXXX
-// TO
-// 88017XXXXXXXX
-// ================================
 
+// =======================
+// PHONE FORMAT
+// =======================
 
 
 const formatPhoneNumber=(phone:string)=>{
 
 
-const number = phone.replace(
+const number =
+phone.replace(
 /\D/g,
 ''
 )
+
+
+
 
 
 if(number.startsWith('880')){
@@ -297,7 +355,10 @@ if(number.startsWith('880')){
 
 return number
 
+
 }
+
+
 
 
 
@@ -306,7 +367,10 @@ if(number.startsWith('01')){
 
 return '88'+number
 
+
 }
+
+
 
 
 
@@ -326,16 +390,20 @@ return number
 
 
 
-// ================================
+// =======================
 // SEND OTP
-// ================================
+// =======================
+
 
 
 const sendOTP=async()=>{
 
 
 
-const phone = getValues('phone')
+const phone =
+getValues('phone')
+
+
 
 
 
@@ -356,8 +424,29 @@ return
 
 
 
+
 const phoneNumber =
 formatPhoneNumber(phone)
+
+
+
+
+
+
+if(!phoneNumber.startsWith('8801')){
+
+
+toast.error(
+'Invalid Bangladesh phone number'
+)
+
+
+return
+
+
+}
+
+
 
 
 
@@ -369,13 +458,15 @@ setOtpLoading(true)
 
 
 
+
+
 try{
 
 
 
-const otpCode = 
+const otpCode =
 Math.floor(
-100000 +
+100000+
 Math.random()*900000
 )
 .toString()
@@ -385,7 +476,9 @@ Math.random()*900000
 
 
 
-const response = await fetch(
+
+const response =
+await fetch(
 '/api/send-otp',
 {
 
@@ -396,10 +489,12 @@ method:'POST',
 headers:{
 
 
-'Content-Type':'application/json'
+'Content-Type':
+'application/json'
 
 
 },
+
 
 
 body:JSON.stringify({
@@ -423,8 +518,12 @@ otp:otpCode
 
 
 
+
+
+
 const result =
 await response.json()
+
 
 
 
@@ -436,12 +535,13 @@ if(!response.ok){
 
 
 throw new Error(
-result.message ||
-'OTP send failed'
+result.error ||
+'OTP failed'
 )
 
 
 }
+
 
 
 
@@ -458,6 +558,9 @@ setOtpSent(true)
 
 
 
+
+
+
 toast.success(
 'OTP sent successfully'
 )
@@ -466,20 +569,24 @@ toast.success(
 
 
 
-}catch(error){
 
+
+}
+
+catch(error){
 
 
 console.error(error)
 
 
 toast.error(
-'Failed to send OTP'
+'OTP send failed'
 )
 
 
+}
 
-}finally{
+finally{
 
 
 setOtpLoading(false)
@@ -499,9 +606,11 @@ setOtpLoading(false)
 
 
 
-// ================================
+
+
+// =======================
 // VERIFY OTP
-// ================================
+// =======================
 
 
 
@@ -513,7 +622,9 @@ otp === generatedOtp
 ){
 
 
+
 setOtpVerified(true)
+
 
 
 toast.success(
@@ -536,68 +647,6 @@ toast.error(
 }
 
 
-}
-
-
-
-
-
-
-
-
-
-
-
-// ================================
-// LOCATION
-// ================================
-
-
-
-const fetchDistricts=async()=>{
-
-
-
-const {
-
-
-data,
-
-
-error
-
-
-}=await supabase
-
-
-.from('districts')
-
-
-.select(
-'id,name'
-)
-
-
-.order(
-'name'
-)
-
-
-
-
-
-
-if(!error){
-
-
-setDistricts(
-data || []
-)
-
-
-}
-
-
 
 }
 
@@ -609,47 +658,34 @@ data || []
 
 
 
-const fetchUpazilas=async(
 
 
-districtId:string
 
+// =======================
+// DISTRICT CHANGE
+// =======================
+
+
+const handleDistrictChange=(
+
+e:React.ChangeEvent<HTMLSelectElement>
 
 )=>{
 
 
 
-const {
-
-
-data,
-
-
-error
-
-
-}=await supabase
-
-
-.from('upazilas')
-
-
-.select(
-'id,name'
+const id =
+Number(
+e.target.value
 )
 
 
-.eq(
-
-'district_id',
-
-parseInt(districtId)
-
-)
 
 
-.order(
-'name'
+
+const district =
+districts.find(
+item=>item.id===id
 )
 
 
@@ -657,95 +693,54 @@ parseInt(districtId)
 
 
 
-if(!error){
+
+if(district){
+
+
+
+setSelectedDistrict(
+district
+)
+
 
 
 setUpazilas(
-data || []
+district.upazilas
 )
 
 
-}
-
-
-
 
 }
 
-
-
-
-
-
-
-
-
-useEffect(()=>{
-
-
-fetchDistricts()
-
-
-},[])
-
-
-
-
-
-
-
-useEffect(()=>{
-
-
-
-if(selectedDistrict){
-
-
-fetchUpazilas(
-selectedDistrict
-)
-
-
-}
-
-else{
-
-
-setUpazilas([])
 
 
 }
 
 
 
-},[selectedDistrict])
-// ================================
+
+
+
+// =======================
 // SUBMIT
-// ================================
+// =======================
 
 
 const onSubmit = async(
+
 data:DoctorSignupForm
+
 )=>{
+
+
+
 
 
 if(!otpVerified){
 
-toast.error(
-'Please verify your phone number first'
-)
-
-return
-
-}
-
-
-
-if(data.password !== data.confirmPassword){
-
 
 toast.error(
-'Passwords do not match'
+'Please verify phone first'
 )
 
 
@@ -757,7 +752,33 @@ return
 
 
 
-if(data.password.length < 6){
+
+
+
+if(
+data.password !== data.confirmPassword
+){
+
+
+toast.error(
+'Password not match'
+)
+
+
+return
+
+
+}
+
+
+
+
+
+
+
+if(
+data.password.length < 6
+){
 
 
 toast.error(
@@ -774,7 +795,30 @@ return
 
 
 
+
+
+if(!selectedDistrict){
+
+
+toast.error(
+'Select district'
+)
+
+
+return
+
+
+}
+
+
+
+
+
+
+
 setIsLoading(true)
+
+
 
 
 
@@ -784,33 +828,10 @@ try{
 
 
 
-// FORMAT PHONE
-
-
-const phoneNumber =
-formatPhoneNumber(
-data.phone
-)
 
 
 
-
-const whatsappNumber =
-data.whatsapp
-?
-formatPhoneNumber(
-data.whatsapp
-)
-:
-null
-
-
-
-
-
-
-
-// EMAIL CHECK
+// CHECK EMAIL
 
 
 const {
@@ -827,15 +848,13 @@ data:existingUser
 
 
 .eq(
-
 'email',
-
 data.email
-
 )
 
 
 .maybeSingle()
+
 
 
 
@@ -846,64 +865,7 @@ if(existingUser){
 
 
 toast.error(
-'Email already registered'
-)
-
-
-return
-
-
-}
-
-
-
-
-
-
-
-
-
-// BMDC CHECK
-
-
-
-const {
-
-
-data:existingDoctor
-
-
-}=await supabase
-
-
-.from('doctors')
-
-
-.select('bmdc_number')
-
-
-.eq(
-
-'bmdc_number',
-
-data.bmdc_number
-
-)
-
-
-.maybeSingle()
-
-
-
-
-
-
-
-if(existingDoctor){
-
-
-toast.error(
-'BMDC number already registered'
+'Email already exists'
 )
 
 
@@ -926,12 +888,9 @@ return
 
 const {
 
-
 data:authData,
 
-
 error:authError
-
 
 }=await supabase.auth.signUp({
 
@@ -947,9 +906,7 @@ password:data.password,
 options:{
 
 
-
 data:{
-
 
 
 name:data.name,
@@ -958,10 +915,7 @@ name:data.name,
 role:'doctor',
 
 
-phone:phoneNumber,
-
-
-whatsapp:whatsappNumber,
+phone:data.phone,
 
 
 is_approved:false
@@ -969,7 +923,6 @@ is_approved:false
 
 
 }
-
 
 
 }
@@ -984,10 +937,14 @@ is_approved:false
 
 
 
-if(authError)
+
+if(authError){
+
+
 throw authError
 
 
+}
 
 
 
@@ -995,7 +952,24 @@ throw authError
 
 
 
-if(authData.user){
+
+if(!authData.user){
+
+
+throw new Error(
+'Account create failed'
+)
+
+
+}
+
+
+
+
+
+
+const userId =
+authData.user.id
 
 
 
@@ -1003,29 +977,28 @@ if(authData.user){
 
 
 
-// CREATE PROFILE
+
+
+
+// PROFILE INSERT
 
 
 
 const {
 
-
 error:profileError
-
 
 }=await supabase
 
 
-
 .from('profiles')
-
 
 
 .insert({
 
 
 
-id:authData.user.id,
+id:userId,
 
 
 name:data.name,
@@ -1034,10 +1007,10 @@ name:data.name,
 email:data.email,
 
 
-phone:phoneNumber,
+phone:data.phone,
 
 
-whatsapp:whatsappNumber,
+whatsapp:data.whatsapp,
 
 
 role:'doctor',
@@ -1062,11 +1035,13 @@ is_approved:false
 
 
 
+if(profileError){
 
-if(profileError)
+
 throw profileError
 
 
+}
 
 
 
@@ -1076,29 +1051,27 @@ throw profileError
 
 
 
-// CREATE DOCTOR RECORD
+
+
+// DOCTOR INSERT
 
 
 
 const {
 
-
 error:doctorError
-
 
 }=await supabase
 
 
-
 .from('doctors')
-
 
 
 .insert({
 
 
 
-user_id:authData.user.id,
+id:userId,
 
 
 bmdc_number:data.bmdc_number,
@@ -1110,17 +1083,14 @@ speciality:data.speciality,
 degree:data.degree,
 
 
-experience:
-Number(data.experience),
+experience:Number(
+data.experience
+),
 
 
-
-consultation_fee:
-Number(data.consultation_fee),
-
-
-
-is_available:false,
+consultation_fee:Number(
+data.consultation_fee
+),
 
 
 is_approved:false
@@ -1135,9 +1105,14 @@ is_approved:false
 
 
 
+if(doctorError){
 
-if(doctorError)
+
 throw doctorError
+
+
+}
+
 
 
 
@@ -1146,8 +1121,11 @@ throw doctorError
 
 
 toast.success(
-'Registration submitted successfully'
+
+'Doctor registration submitted'
+
 )
+
 
 
 
@@ -1164,15 +1142,14 @@ onClose()
 
 
 
+
 // AUTO LOGIN
 
 
 
 const {
 
-
 error:loginError
-
 
 }=await supabase.auth.signInWithPassword({
 
@@ -1194,16 +1171,16 @@ password:data.password
 
 
 
+
 if(!loginError){
 
 
+
 router.push(
+
 '/doctor/pending-approval'
+
 )
-
-
-
-router.refresh()
 
 
 }
@@ -1215,19 +1192,14 @@ router.refresh()
 
 
 
+
 }
 
+catch(error:unknown){
 
 
 
-}catch(error:unknown){
-
-
-
-console.error(
-'Doctor Signup Error:',
-error
-)
+console.error(error)
 
 
 
@@ -1241,11 +1213,13 @@ error.message
 )
 
 
-}else{
+}
+
+else{
 
 
 toast.error(
-'Signup failed'
+'Registration failed'
 )
 
 
@@ -1254,13 +1228,17 @@ toast.error(
 
 
 
-}finally{
+}
+
+finally{
 
 
 setIsLoading(false)
 
 
 }
+
+
 
 
 
@@ -1337,6 +1315,8 @@ gap-4
 
 
 
+{/* NAME */}
+
 <div>
 
 <label className="input-label">
@@ -1381,13 +1361,17 @@ pl-10
 
 </div>
 
-
 </div>
 
 
 
 
 
+
+
+
+
+{/* EMAIL */}
 
 
 <div>
@@ -1398,7 +1382,6 @@ pl-10
 Email *
 
 </label>
-
 
 
 <div className="relative">
@@ -1442,6 +1425,11 @@ pl-10
 
 
 
+
+
+
+
+{/* PHONE */}
 
 
 <div>
@@ -1493,7 +1481,10 @@ pl-10
 
 
 
+
+
 {
+
 !otpSent &&
 
 <button
@@ -1504,14 +1495,15 @@ onClick={sendOTP}
 
 disabled={otpLoading}
 
+
 className="
 mt-3
-text-sm
 bg-teal-600
 text-white
 px-4
 py-2
 rounded-lg
+text-sm
 "
 
 >
@@ -1539,14 +1531,25 @@ otpLoading
 
 
 
-{
-otpSent && !otpVerified &&
 
-<div className="
+
+
+
+{
+
+otpSent &&
+!otpVerified &&
+
+
+<div
+
+className="
 mt-3
 flex
 gap-2
-">
+"
+
+>
 
 
 <input
@@ -1561,15 +1564,19 @@ placeholder="Enter OTP"
 value={otp}
 
 
-onChange={(e)=>
-setOtp(e.target.value)
+onChange={
+e=>setOtp(
+e.target.value
+)
 }
 
 
 className="
 input-field
 "
+
 />
+
 
 
 
@@ -1593,24 +1600,37 @@ Verify
 </button>
 
 
+
 </div>
+
 
 }
 
 
 
 
+
+
+
+
+
 {
+
 otpVerified &&
 
-<p className="
+
+<p
+
+className="
 text-green-600
 text-sm
 mt-2
 flex
 items-center
 gap-1
-">
+"
+
+>
 
 <ShieldCheck size={16}/>
 
@@ -1623,8 +1643,6 @@ Phone Verified
 
 
 
-
-
 </div>
 
 
@@ -1633,6 +1651,13 @@ Phone Verified
 
 
 
+
+
+
+
+
+
+{/* WHATSAPP */}
 
 
 <div>
@@ -1645,12 +1670,13 @@ WhatsApp Number
 </label>
 
 
-
 <input
+
 
 type="tel"
 
-placeholder="8801XXXXXXXXX"
+
+placeholder="88017XXXXXXXX"
 
 
 {...register(
@@ -1675,6 +1701,14 @@ input-field
 
 
 
+
+
+
+
+
+{/* BMDC */}
+
+
 <div>
 
 
@@ -1695,9 +1729,12 @@ BMDC Number *
 
 <input
 
+
 type="text"
 
+
 placeholder="BMDC-12345"
+
 
 
 {...register(
@@ -1732,6 +1769,13 @@ pl-10
 
 
 
+
+
+
+
+{/* SPECIALITY */}
+
+
 <div>
 
 
@@ -1740,7 +1784,6 @@ pl-10
 Speciality *
 
 </label>
-
 
 
 <select
@@ -1757,9 +1800,9 @@ required:'Speciality required'
 )}
 
 
-
-className="input-field"
-
+className="
+input-field
+"
 
 >
 
@@ -1769,7 +1812,6 @@ className="input-field"
 Select speciality
 
 </option>
-
 
 
 {
@@ -1805,9 +1847,18 @@ value={item}
 
 
 
-</div>
+
+
 
 </div>
+
+
+</div>
+
+
+
+
+
 
 
 
@@ -1860,12 +1911,16 @@ Professional Details
 
 
 
+
+
 <div className="
 grid
 grid-cols-1
 md:grid-cols-2
 gap-4
 ">
+
+
 
 
 
@@ -1885,7 +1940,9 @@ required:'Degree required'
 )}
 
 
-className="input-field"
+className="
+input-field
+"
 
 >
 
@@ -1897,9 +1954,11 @@ Select Degree
 </option>
 
 
+
 {
 
 degrees.map(item=>(
+
 
 <option
 
@@ -1909,17 +1968,23 @@ value={item}
 
 >
 
+
 {item}
+
 
 </option>
 
+
 ))
+
 
 }
 
 
 
 </select>
+
+
 
 
 
@@ -1949,9 +2014,12 @@ required:'Experience required'
 
 
 
-className="input-field"
+className="
+input-field
+"
 
 />
+
 
 
 
@@ -1982,13 +2050,19 @@ required:'Fee required'
 
 
 
-className="input-field"
+className="
+input-field
+"
 
 />
 
 
 
 
+
+
+
+
 </div>
 
 
@@ -2002,7 +2076,13 @@ className="input-field"
 
 
 
-{/* LOCATION */}
+
+
+
+
+
+
+{/* LOCATION SECTION */}
 
 
 
@@ -2037,8 +2117,10 @@ Clinic Location
 </h3>
 
 
-
 </div>
+
+
+
 
 
 
@@ -2053,6 +2135,11 @@ gap-4
 ">
 
 
+
+
+
+
+{/* DISTRICT */}
 
 
 
@@ -2071,14 +2158,14 @@ required:'District required'
 
 
 
-onChange={(e)=>
-setSelectedDistrict(
-e.target.value
-)
+onChange={
+handleDistrictChange
 }
 
 
-className="input-field"
+className="
+input-field
+"
 
 >
 
@@ -2090,9 +2177,12 @@ Select District
 </option>
 
 
+
+
 {
 
 districts.map(item=>(
+
 
 <option
 
@@ -2102,14 +2192,19 @@ value={item.id}
 
 >
 
+
 {item.name}
+
 
 </option>
 
 
 ))
 
+
 }
+
+
 
 
 </select>
@@ -2117,6 +2212,18 @@ value={item.id}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+{/* UPAZILA */}
 
 
 
@@ -2134,7 +2241,10 @@ required:'Upazila required'
 )}
 
 
-disabled={!selectedDistrict}
+
+disabled={
+!selectedDistrict
+}
 
 
 
@@ -2142,7 +2252,6 @@ className="
 input-field
 disabled:bg-gray-100
 "
-
 
 >
 
@@ -2154,24 +2263,35 @@ Select Upazila
 </option>
 
 
+
+
 {
 
-upazilas.map(item=>(
+upazilas.map(
+
+(item,index)=>(
+
 
 <option
 
-key={item.id}
+key={index}
 
-value={item.id}
+value={item}
 
 >
 
-{item.name}
+
+{item}
+
 
 </option>
 
 
-))
+)
+
+
+)
+
 
 }
 
@@ -2183,8 +2303,13 @@ value={item.id}
 
 
 
+
+
+
+
 </div>
 
+
 </div>
 
 
@@ -2192,47 +2317,63 @@ value={item.id}
 
 
 
-
-
-
-{/* SECURITY */}
-
+{/* ADDRESS */}
 
 
 <div>
 
 
-<div className="
-flex
-items-center
-gap-2
-mb-4
-">
+<label className="input-label">
+
+Address *
+
+</label>
 
 
-<Lock
 
-size={21}
+<textarea
 
-className="text-primary"
+
+rows={3}
+
+
+
+placeholder="Clinic address"
+
+
+
+{...register(
+
+'address',
+
+{
+required:'Address required'
+}
+
+)}
+
+
+
+className="
+input-field
+resize-none
+"
+
+
 
 />
 
 
 
-<h3 className="
-font-semibold
-text-teal-dark
-">
-
-Account Security
-
-</h3>
-
-
 </div>
 
 
+
+
+
+
+
+{/* PASSWORD */}
 
 
 
@@ -2267,9 +2408,14 @@ required:'Password required'
 
 
 
-className="input-field"
+className="
+input-field
+"
+
+
 
 />
+
 
 
 
@@ -2298,16 +2444,14 @@ required:'Confirm password required'
 
 
 
-className="input-field"
+className="
+input-field
+"
+
+
 
 />
 
-
-
-
-
-
-</div>
 
 
 </div>
@@ -2329,18 +2473,27 @@ type="submit"
 disabled={isLoading}
 
 
-
 className="
+
 w-full
+
 bg-primary
-hover:bg-primary-dark
+
 text-white
-py-3.5
+
+py-3
+
 rounded-xl
+
 font-semibold
-shadow-lg
-disabled:opacity-50
+
+hover:opacity-90
+
+transition
+
 "
+
+
 
 >
 
@@ -2355,9 +2508,10 @@ isLoading
 
 :
 
-'Submit For Approval'
+'Register Doctor'
 
 }
+
 
 
 </button>
@@ -2366,27 +2520,22 @@ isLoading
 
 
 
+<p
 
-
-<p className="
+className="
 text-center
 text-sm
-text-text-grey
-">
+text-gray-500
+"
 
+>
 
-Your account will be reviewed by Quick Treat admin before approval.
-
+Your doctor account will be reviewed by Quick Treat admin before approval.
 
 </p>
 
 
-
-
-
-
 </form>
-
 
 )
 

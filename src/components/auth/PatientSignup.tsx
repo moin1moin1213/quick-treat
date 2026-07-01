@@ -21,6 +21,9 @@ import {
 
 import toast from 'react-hot-toast'
 
+import {
+  districts as bangladeshDistricts
+} from '@/components/data/bangladesh-location'
 
 import {
 
@@ -83,10 +86,9 @@ interface District {
 
   name:string
 
+  upazilas:string[]
+
 }
-
-
-
 
 
 interface Upazila {
@@ -96,7 +98,6 @@ interface Upazila {
   name:string
 
 }
-
 
 
 
@@ -285,105 +286,6 @@ return phoneNumber
 
 
 
-const fetchDistricts=async()=>{
-
-
-const {
-
-data,
-
-error
-
-}=await supabase
-
-
-.from('districts')
-
-
-.select('id,name')
-
-
-.order('name')
-
-
-
-
-
-if(!error){
-
-
-setDistricts(
-data || []
-)
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-const fetchUpazilas=async(
-
-districtId:string
-
-)=>{
-
-
-
-const {
-
-data,
-
-error
-
-}=await supabase
-
-
-
-.from('upazilas')
-
-
-.select('id,name')
-
-
-.eq(
-
-'district_id',
-
-parseInt(districtId)
-
-)
-
-
-.order('name')
-
-
-
-
-
-
-if(!error){
-
-
-setUpazilas(
-data || []
-)
-
-
-}
-
-
-
-}
 
 
 
@@ -397,9 +299,9 @@ data || []
 
 useEffect(()=>{
 
-
-fetchDistricts()
-
+setDistricts(
+bangladeshDistricts
+)
 
 },[])
 
@@ -411,32 +313,51 @@ fetchDistricts()
 
 
 
-
 useEffect(()=>{
 
 
-if(selectedDistrict){
+if(!selectedDistrict){
+
+setUpazilas([])
+
+return
+
+}
 
 
-fetchUpazilas(
-selectedDistrict
+
+const district =
+districts.find(
+item=>item.id===Number(selectedDistrict)
+)
+
+
+
+if(district){
+
+
+setUpazilas(
+
+district.upazilas.map(
+(item,index)=>({
+
+id:index+1,
+
+name:item
+
+})
+)
+
 )
 
 
 }
 
-else{
 
-
-setUpazilas([])
-
-
-}
-
-
-
-},[selectedDistrict])
-
+},[
+selectedDistrict,
+districts
+])
 
 
 

@@ -25,6 +25,26 @@ supabase
 import toast from 'react-hot-toast'
 
 
+import {
+
+Building2,
+Phone,
+MapPin,
+ShieldCheck,
+
+} from 'lucide-react'
+
+
+
+import {
+
+districts
+
+} from '@/components/data/bangladesh-location'
+
+
+
+
 
 
 
@@ -68,28 +88,15 @@ confirmPassword:string
 
 
 
-interface District {
 
 
-id:number
-
-name:string
-
-
-}
-
-
-
-
-
-
-interface Upazila {
-
+interface LocationDistrict {
 
 id:number
 
 name:string
 
+upazilas:string[]
 
 }
 
@@ -120,7 +127,9 @@ onClose:()=>void
 
 
 
-const router = useRouter()
+const router =
+useRouter()
+
 
 
 
@@ -134,8 +143,12 @@ useState(false)
 
 
 
+
+
+
+
 // =======================
-// OTP STATES
+// OTP
 // =======================
 
 
@@ -143,20 +156,20 @@ const [otp,setOtp] =
 useState('')
 
 
-
 const [otpSent,setOtpSent] =
 useState(false)
-
 
 
 const [otpVerified,setOtpVerified] =
 useState(false)
 
 
-
 const [otpLoading,setOtpLoading] =
 useState(false)
 
+
+const [verifiedPhone,setVerifiedPhone] =
+useState('')
 
 
 const [resendTime,setResendTime] =
@@ -169,33 +182,30 @@ useState(0)
 
 
 
-const [verifiedPhone,setVerifiedPhone] =
-useState('')
-
-
-
-
-
-
 
 
 
 // =======================
-// LOCATION STATES
+// LOCATION
 // =======================
 
 
 
-const [districts,setDistricts] =
-useState<District[]>([])
+const [locationData,setLocationData] =
+useState<LocationDistrict[]>([])
 
 
 
-const [upazilas,setUpazilas]=useState<Upazila[]>([])
+const [upazilas,setUpazilas] =
+useState<string[]>([])
 
 
 
-const [selectedDistrict, setSelectedDistrict] = useState<string>('')
+const [selectedDistrict,setSelectedDistrict] =
+useState<number | null>(null)
+
+
+
 
 
 
@@ -213,10 +223,101 @@ register,
 handleSubmit,
 
 
-formState:{errors}
+getValues
 
 
 }=useForm<HospitalSignupForm>()
+
+
+
+
+
+
+
+
+
+
+
+// =======================
+// LOAD LOCATION
+// =======================
+
+
+
+useEffect(()=>{
+
+
+setLocationData(
+districts as LocationDistrict[]
+)
+
+
+},[])
+
+
+
+
+
+
+
+
+
+
+
+
+// =======================
+// DISTRICT CHANGE
+// =======================
+
+
+const handleDistrictChange=(
+
+e:React.ChangeEvent<HTMLSelectElement>
+
+)=>{
+
+
+const id =
+Number(e.target.value)
+
+
+
+setSelectedDistrict(id)
+
+
+
+const district =
+locationData.find(
+item=>item.id===id
+)
+
+
+
+
+
+if(district){
+
+
+setUpazilas(
+district.upazilas
+)
+
+
+}
+
+else{
+
+
+setUpazilas([])
+
+
+}
+
+
+
+}
+
+
 
 
 
@@ -236,11 +337,18 @@ const formatPhone=(phone:string)=>{
 
 
 const number =
-phone.replace(/\D/g,'')
+phone.replace(
+/\D/g,
+''
+)
 
 
 
-if(number.startsWith('8801')){
+
+
+if(
+number.startsWith('8801')
+){
 
 
 return number
@@ -250,7 +358,11 @@ return number
 
 
 
-if(number.startsWith('01')){
+
+
+if(
+number.startsWith('01')
+){
 
 
 return '88'+number
@@ -260,10 +372,13 @@ return '88'+number
 
 
 
+
+
 return number
 
 
 }
+
 
 
 
@@ -284,18 +399,26 @@ return number
 const sendOTP=async()=>{
 
 
-const phoneValue =
-formatPhone(
-(document.querySelector(
-'#hospital-phone'
-) as HTMLInputElement)?.value || ''
-)
+
+const phone =
+getValues('phone')
 
 
 
 
 
-if(!phoneValue.startsWith('8801')){
+
+const phoneNumber =
+formatPhone(phone)
+
+
+
+
+
+
+if(
+!phoneNumber.startsWith('8801')
+){
 
 
 toast.error(
@@ -305,7 +428,9 @@ toast.error(
 
 return
 
+
 }
+
 
 
 
@@ -316,13 +441,18 @@ setOtpLoading(true)
 
 
 
+
+
+
 try{
 
 
 
 const response =
 await fetch(
+
 '/api/send-otp',
+
 {
 
 
@@ -335,23 +465,19 @@ headers:{
 'Content-Type':
 'application/json'
 
-
 },
-
 
 
 body:JSON.stringify({
 
-
-phone:phoneValue
-
+phone:phoneNumber
 
 })
-
 
 }
 
 )
+
 
 
 
@@ -371,7 +497,7 @@ if(!response.ok){
 
 throw new Error(
 result.error ||
-'OTP send failed'
+'OTP failed'
 )
 
 
@@ -381,15 +507,21 @@ result.error ||
 
 
 
+
+
+
 setOtpSent(true)
 
 
-
-setVerifiedPhone(phoneValue)
-
+setVerifiedPhone(
+phoneNumber
+)
 
 
 setResendTime(60)
+
+
+
 
 
 
@@ -407,9 +539,7 @@ catch(error){
 
 
 
-console.error(
-error
-)
+console.error(error)
 
 
 
@@ -430,8 +560,8 @@ setOtpLoading(false)
 }
 
 
-
 }
+
 
 
 
@@ -470,13 +600,16 @@ return
 
 
 
-try{
 
+
+try{
 
 
 const response =
 await fetch(
+
 '/api/verify-otp',
+
 {
 
 
@@ -489,19 +622,14 @@ headers:{
 'Content-Type':
 'application/json'
 
-
 },
-
 
 
 body:JSON.stringify({
 
-
 phone:verifiedPhone,
 
-
 otp
-
 
 })
 
@@ -515,8 +643,11 @@ otp
 
 
 
+
+
 const result =
 await response.json()
+
 
 
 
@@ -526,12 +657,12 @@ if(!response.ok){
 
 
 throw new Error(
-result.error ||
-'OTP verification failed'
+result.error
 )
 
 
 }
+
 
 
 
@@ -551,18 +682,13 @@ toast.success(
 
 
 
-
-
 }
 
 catch(error){
 
 
 
-console.error(
-error
-)
-
+console.error(error)
 
 
 toast.error(
@@ -570,7 +696,6 @@ toast.error(
 )
 
 
-
 }
 
 
@@ -585,9 +710,13 @@ toast.error(
 
 
 
+
+
+
 // =======================
-// RESEND TIMER
+// TIMER
 // =======================
+
 
 
 useEffect(()=>{
@@ -595,6 +724,7 @@ useEffect(()=>{
 
 if(resendTime<=0)
 return
+
 
 
 
@@ -618,185 +748,9 @@ return ()=>clearTimeout(timer)
 
 
 
-
 },[resendTime])
 
 
-
-
-
-
-
-
-
-// =======================
-// FETCH DISTRICT
-// =======================
-
-
-
-const fetchDistricts =
-async()=>{
-
-
-const {
-
-
-data,
-
-error
-
-
-}=await supabase
-
-
-.from('districts')
-
-
-.select(
-'id,name'
-)
-
-
-.order(
-'name'
-)
-
-
-
-
-
-if(!error){
-
-
-setDistricts(
-data || []
-)
-
-
-}
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// =======================
-// FETCH UPAZILA
-// =======================
-
-
-
-const fetchUpazilas =
-async(
-districtId:string
-)=>{
-
-
-
-const {
-
-
-data,
-
-error
-
-
-}=await supabase
-
-
-.from('upazilas')
-
-
-.select(
-'id,name'
-)
-
-
-.eq(
-'district_id',
-Number(districtId)
-)
-
-
-.order(
-'name'
-)
-
-
-
-
-
-if(!error){
-
-
-setUpazilas(
-data || []
-)
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-
-useEffect(()=>{
-
-
-fetchDistricts()
-
-
-},[])
-
-
-
-
-
-
-
-
-useEffect(()=>{
-
-
-if(selectedDistrict){
-
-
-fetchUpazilas(
-selectedDistrict
-)
-
-
-}
-
-else{
-
-
-setUpazilas([])
-
-
-}
-
-
-
-
-},[selectedDistrict])
 
 
 // =======================
@@ -805,8 +759,13 @@ setUpazilas([])
 
 
 const onSubmit = async(
+
 data:HospitalSignupForm
+
 )=>{
+
+
+
 
 
 
@@ -828,7 +787,10 @@ return
 
 
 
-if(data.password !== data.confirmPassword){
+
+if(
+data.password !== data.confirmPassword
+){
 
 
 toast.error(
@@ -845,7 +807,11 @@ return
 
 
 
-if(data.password.length < 6){
+
+
+if(
+data.password.length < 6
+){
 
 
 toast.error(
@@ -862,13 +828,39 @@ return
 
 
 
+
+
+if(!selectedDistrict){
+
+
+toast.error(
+'Please select district'
+)
+
+
+return
+
+
+}
+
+
+
+
+
+
+
 setIsLoading(true)
 
 
 
 
 
+
+
+
+
 try{
+
 
 
 
@@ -902,6 +894,8 @@ data.email
 
 
 .maybeSingle()
+
+
 
 
 
@@ -946,7 +940,9 @@ data:existingHospital
 .from('hospitals')
 
 
-.select('dghs_license')
+.select(
+'dghs_license'
+)
 
 
 .eq(
@@ -975,6 +971,9 @@ return
 
 
 }
+
+
+
 
 
 
@@ -1013,9 +1012,7 @@ password:data.password,
 options:{
 
 
-
 data:{
-
 
 
 name:data.hospital_name,
@@ -1030,16 +1027,14 @@ phone:verifiedPhone,
 is_approved:false
 
 
-
 }
 
 
-
 }
-
 
 
 })
+
 
 
 
@@ -1062,6 +1057,7 @@ throw authError
 
 
 
+
 if(!authData.user){
 
 
@@ -1071,7 +1067,6 @@ throw new Error(
 
 
 }
-
 
 
 
@@ -1150,6 +1145,8 @@ is_approved:false
 
 
 
+
+
 if(profileError){
 
 
@@ -1157,6 +1154,8 @@ throw profileError
 
 
 }
+
+
 
 
 
@@ -1193,13 +1192,10 @@ error:hospitalError
 id:userId,
 
 
-
 dghs_license:data.dghs_license,
 
 
-
 whatsapp_number:data.whatsapp_number,
-
 
 
 address:data.address,
@@ -1209,17 +1205,13 @@ address:data.address,
 total_beds:0,
 
 
-
 available_beds:0,
-
 
 
 has_oxygen:false,
 
 
-
 has_ot:false,
-
 
 
 is_approved:false
@@ -1242,7 +1234,6 @@ throw hospitalError
 
 
 }
-
 
 
 
@@ -1295,7 +1286,6 @@ error:loginError
 email:data.email,
 
 
-
 password:data.password
 
 
@@ -1308,18 +1298,20 @@ password:data.password
 
 
 
+
+
 if(!loginError){
 
 
 
 router.push(
+
 '/hospital/pending-approval'
+
 )
 
 
-
 }
-
 
 
 
@@ -1334,6 +1326,8 @@ catch(error:unknown){
 
 
 console.error(error)
+
+
 
 
 
@@ -1359,8 +1353,8 @@ toast.error(
 
 
 
-
 }
+
 
 finally{
 
@@ -1376,58 +1370,105 @@ setIsLoading(false)
 return (
 
 <form
+
 onSubmit={
 handleSubmit(onSubmit)
 }
+
 className="
-space-y-5
+space-y-6
 "
+
 >
 
 
-<div
-className="
+{/* =======================
+HOSPITAL INFORMATION
+======================= */}
+
+
+<div className="
+bg-white
+rounded-2xl
+border
+p-6
+space-y-5
+">
+
+
+<div className="
+flex
+items-center
+gap-2
+text-xl
+font-semibold
+text-gray-800
+">
+
+<Building2 size={22}/>
+
+Hospital Information
+
+</div>
+
+
+
+
+
+
+<div className="
 grid
 grid-cols-1
 md:grid-cols-2
-gap-4
-"
->
+gap-5
+">
 
 
 
-{/* Hospital Name */}
+
+
+
 
 <div className="md:col-span-2">
 
 
 <label className="form-label">
+
 Hospital Name *
+
 </label>
+
 
 
 <input
 
+
 {...register(
+
 'hospital_name',
+
 {
-required:'Hospital name required'
+required:
+'Hospital name required'
 }
+
 )}
 
-placeholder="City Hospital Ltd."
 
-className="form-input"
+
+placeholder="
+City Hospital Ltd.
+"
+
+
+
+className="
+form-input
+"
+
+
 
 />
-
-
-{
-errors.hospital_name &&
-<p className="error-text">
-{errors.hospital_name.message}
-</p>
-}
 
 
 </div>
@@ -1439,13 +1480,14 @@ errors.hospital_name &&
 
 
 
-{/* DGHS */}
 
 <div>
 
 
 <label className="form-label">
-DGHS License Number *
+
+DGHS License *
+
 </label>
 
 
@@ -1453,17 +1495,28 @@ DGHS License Number *
 
 
 {...register(
+
 'dghs_license',
+
 {
-required:'DGHS license required'
+required:
+'DGHS license required'
 }
+
 )}
 
 
-placeholder="DGHS-12345"
+
+placeholder="
+DGHS-12345
+"
 
 
-className="form-input"
+
+className="
+form-input
+"
+
 
 
 />
@@ -1479,13 +1532,13 @@ className="form-input"
 
 
 
-{/* Email */}
-
 <div>
 
 
 <label className="form-label">
+
 Email *
+
 </label>
 
 
@@ -1495,18 +1548,30 @@ Email *
 type="email"
 
 
+
 {...register(
+
 'email',
+
 {
-required:'Email required'
+required:
+'Email required'
 }
+
 )}
 
 
-placeholder="hospital@email.com"
+
+placeholder="
+hospital@email.com
+"
 
 
-className="form-input"
+
+className="
+form-input
+"
+
 
 
 />
@@ -1520,38 +1585,103 @@ className="form-input"
 
 
 
+</div>
 
 
-{/* Phone + OTP */}
+</div>
 
 
-<div>
+
+
+
+
+
+
+
+{/* =======================
+PHONE OTP
+======================= */}
+
+
+
+<div className="
+bg-white
+rounded-2xl
+border
+p-6
+space-y-5
+">
+
+
+
+<div className="
+flex
+items-center
+gap-2
+text-xl
+font-semibold
+">
+
+<Phone size={22}/>
+
+Phone Verification
+
+</div>
+
+
+
+
+
 
 
 <label className="form-label">
+
 Phone Number *
+
 </label>
 
 
 
-<div
-className="
+
+
+
+<div className="
 flex
-gap-2
-"
->
+gap-3
+">
+
 
 
 <input
 
 
+
 id="hospital-phone"
+
 
 
 type="tel"
 
 
-placeholder="8801712345678"
+
+placeholder="
+01712345678
+"
+
+
+
+
+{...register(
+
+'phone',
+
+{
+required:
+'Phone required'
+}
+
+)}
+
 
 
 className="
@@ -1560,15 +1690,9 @@ flex-1
 "
 
 
-{...register(
-'phone',
-{
-required:'Phone required'
-}
-)}
-
 
 />
+
 
 
 
@@ -1579,7 +1703,9 @@ required:'Phone required'
 type="button"
 
 
+
 onClick={sendOTP}
+
 
 
 disabled={
@@ -1588,14 +1714,14 @@ resendTime>0
 }
 
 
+
 className="
 bg-teal-600
 text-white
-px-4
-rounded-lg
-text-sm
-disabled:opacity-50
+px-5
+rounded-xl
 "
+
 
 
 >
@@ -1628,9 +1754,6 @@ resendTime>0
 
 
 
-</div>
-
-
 
 </div>
 
@@ -1640,49 +1763,58 @@ resendTime>0
 
 
 
-
-
-{/* OTP */}
 
 
 {
+
 otpSent &&
 
 <div>
 
 
+
 <label className="form-label">
-Enter OTP *
+
+OTP Code
+
 </label>
 
 
 
-<div
-className="
+
+
+<div className="
 flex
-gap-2
-"
->
+gap-3
+">
+
 
 
 <input
 
 
-type="text"
-
 
 maxLength={6}
+
 
 
 value={otp}
 
 
+
 onChange={
-e=>setOtp(e.target.value)
+
+e=>
+setOtp(e.target.value)
+
 }
 
 
-placeholder="123456"
+
+placeholder="
+123456
+"
+
 
 
 className="
@@ -1691,7 +1823,11 @@ flex-1
 "
 
 
+
 />
+
+
+
 
 
 
@@ -1702,22 +1838,26 @@ flex-1
 type="button"
 
 
+
 onClick={verifyOTP}
+
 
 
 disabled={otpVerified}
 
 
+
 className="
 bg-green-600
 text-white
-px-4
-rounded-lg
-disabled:opacity-50
+px-5
+rounded-xl
 "
 
 
+
 >
+
 
 
 {
@@ -1738,46 +1878,60 @@ otpVerified
 </button>
 
 
+
 </div>
 
 
+
 </div>
+
+
 
 }
 
 
 
 
-
-{/* Whatsapp */}
-
-
-<div>
+</div>
 
 
-<label className="form-label">
-WhatsApp Number
-</label>
 
 
-<input
 
 
-type="tel"
 
 
-placeholder="8801712345678"
+
+{/* =======================
+LOCATION
+======================= */}
 
 
-{...register(
-'whatsapp_number'
-)}
 
 
-className="form-input"
+<div className="
+bg-white
+rounded-2xl
+border
+p-6
+space-y-5
+">
 
 
-/>
+
+<div className="
+flex
+items-center
+gap-2
+text-xl
+font-semibold
+">
+
+
+<MapPin size={22}/>
+
+
+Location
 
 
 </div>
@@ -1788,48 +1942,74 @@ className="form-input"
 
 
 
+<div className="
+grid
+grid-cols-1
+md:grid-cols-2
+gap-5
+">
 
-{/* District */}
+
+
+
 
 
 <div>
 
 
 <label className="form-label">
+
 District *
+
 </label>
+
+
+
 
 
 <select
 
 
+
 {...register(
+
 'district',
+
 {
-required:'District required'
+required:
+'District required'
 }
+
 )}
 
 
 
-onChange={(e) => setSelectedDistrict(e.target.value)}
+onChange={handleDistrictChange}
 
 
-className="form-input"
+
+className="
+form-input
+"
+
 
 
 >
 
 
+
 <option value="">
+
 Select District
+
 </option>
+
 
 
 
 {
 
-districts.map(item=>(
+locationData.map(item=>(
 
 
 <option
@@ -1847,11 +2027,14 @@ value={item.id}
 
 ))
 
+
 }
 
 
 
+
 </select>
+
 
 
 </div>
@@ -1864,29 +2047,42 @@ value={item.id}
 
 
 
-{/* Upazila */}
-
-
 <div>
 
 
 <label className="form-label">
-Upazila *
+
+Upazila / Thana *
+
 </label>
+
+
+
+
 
 
 <select
 
 
+
 {...register(
+
 'upazila',
+
 {
-required:'Upazila required'
+required:
+'Upazila required'
 }
+
 )}
 
 
-disabled={!selectedDistrict}
+
+
+disabled={
+!selectedDistrict
+}
+
 
 
 className="
@@ -1895,41 +2091,46 @@ disabled:bg-gray-100
 "
 
 
+
 >
 
 
 <option value="">
+
+
 Select Upazila
+
+
 </option>
+
+
+
 
 
 
 {
-
-upazilas.map(item=>(
-
+upazilas.map((item,index)=>(
 
 <option
 
-key={item.id}
+key={index}
 
-value={item.id}
+value={item}
 
 >
 
-{item.name}
+{item}
 
 </option>
 
-
 ))
-
-
 }
 
 
 
+
 </select>
+
 
 
 </div>
@@ -1940,34 +2141,39 @@ value={item.id}
 
 
 
+</div>
 
 
-{/* Address */}
 
 
-<div className="md:col-span-2">
 
-
-<label className="form-label">
-Full Address *
-</label>
 
 
 <textarea
 
 
+
 rows={3}
 
 
+
 {...register(
+
 'address',
+
 {
-required:'Address required'
+required:
+'Address required'
 }
+
 )}
 
 
-placeholder="Hospital full address"
+
+placeholder="
+Hospital full address
+"
+
 
 
 className="
@@ -1976,7 +2182,11 @@ resize-none
 "
 
 
+
 />
+
+
+
 
 
 </div>
@@ -1989,92 +2199,144 @@ resize-none
 
 
 
-{/* Password */}
+{/* =======================
+SECURITY
+======================= */}
 
 
-<div>
 
 
-<label className="form-label">
-Password *
-</label>
+<div className="
+bg-white
+rounded-2xl
+border
+p-6
+space-y-5
+">
+
+
+
+<div className="
+flex
+items-center
+gap-2
+text-xl
+font-semibold
+">
+
+<ShieldCheck size={22}/>
+
+
+Security
+
+
+</div>
+
+
+
+
+
+
+
+<div className="
+grid
+grid-cols-1
+md:grid-cols-2
+gap-5
+">
+
+
+
 
 
 <input
 
 
+
 type="password"
 
 
+
 {...register(
+
 'password',
+
 {
-required:'Password required'
+required:
+'Password required'
 }
+
 )}
 
 
-placeholder="******"
+
+placeholder="
+Password
+"
 
 
-className="form-input"
+
+className="
+form-input
+"
+
 
 
 />
 
 
-</div>
 
 
 
 
-
-
-
-
-{/* Confirm Password */}
-
-
-<div>
-
-
-<label className="form-label">
-Confirm Password *
-</label>
 
 
 <input
 
 
+
 type="password"
 
 
+
 {...register(
+
 'confirmPassword',
+
 {
-required:'Confirm password required'
+required:
+'Confirm password required'
 }
+
 )}
 
 
-placeholder="******"
+
+placeholder="
+Confirm Password
+"
 
 
-className="form-input"
+
+className="
+form-input
+"
+
 
 
 />
 
 
+
+
+
+
+
 </div>
 
 
 
-
-
-
 </div>
-
 
 
 
@@ -2087,23 +2349,39 @@ className="form-input"
 <button
 
 
+
 type="submit"
+
 
 
 disabled={isLoading}
 
 
+
 className="
+
 w-full
+
 bg-primary
+
 text-white
-py-3
-rounded-xl
+
+py-4
+
+rounded-2xl
+
 font-semibold
+
+text-lg
+
 hover:opacity-90
+
 transition
+
 disabled:opacity-50
+
 "
+
 
 
 >
@@ -2126,6 +2404,8 @@ isLoading
 }
 
 
+
+
 </button>
 
 
@@ -2144,9 +2424,7 @@ text-gray-500
 
 >
 
-
 Your hospital account will be reviewed by Quick Treat admin before approval.
-
 
 </p>
 
@@ -2155,8 +2433,7 @@ Your hospital account will be reviewed by Quick Treat admin before approval.
 
 
 
+
 </form>
 
-)
-
-}
+)}
