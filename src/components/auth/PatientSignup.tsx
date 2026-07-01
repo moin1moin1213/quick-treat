@@ -376,11 +376,14 @@ districts
 
 
 
-const sendOTP=async()=>{
+const sendOTP = async()=>{
+
+
+const phoneNumber = getValues('phone')
 
 
 
-if(!phone){
+if(!phoneNumber){
 
 
 toast.error(
@@ -397,17 +400,27 @@ return
 
 
 
-
-const formattedPhone =
-formatPhoneNumber(phone)
-
+const formattedPhone = 
+formatPhoneNumber(phoneNumber)
 
 
 
 
 
-if(formattedPhone.length !== 13){
+console.log(
+"Formatted Phone:",
+formattedPhone
+)
 
+
+
+
+
+
+if(
+!formattedPhone.startsWith('8801') ||
+formattedPhone.length !== 13
+){
 
 
 toast.error(
@@ -415,12 +428,10 @@ toast.error(
 )
 
 
-
 return
 
 
 }
-
 
 
 
@@ -440,40 +451,28 @@ setSendingOtp(true)
 
 const response = await fetch(
 
-
 '/api/send-otp',
-
 
 {
 
-
 method:'POST',
 
-
 headers:{
-
 
 'Content-Type':
 'application/json'
 
-
 },
-
 
 
 body:JSON.stringify({
 
-
 phone:formattedPhone
-
 
 })
 
 
-
 }
-
-
 
 )
 
@@ -483,16 +482,27 @@ phone:formattedPhone
 
 
 
-
-const result =
-await response.json()
+const result = await response.json()
 
 
 
 
 
+console.log(
+"OTP API Response:",
+result
+)
 
-if(result.success){
+
+
+
+
+
+
+if(
+result.success === true ||
+result.status === 'success'
+){
 
 
 setOtpSent(true)
@@ -501,7 +511,6 @@ setOtpSent(true)
 toast.success(
 'OTP sent successfully'
 )
-
 
 
 }
@@ -518,23 +527,20 @@ result.message ||
 )
 
 
-
 }
 
 
 
+
 }
-
-
 
 catch(error){
 
 
-
 console.error(
+"OTP Error:",
 error
 )
-
 
 
 toast.error(
@@ -542,9 +548,7 @@ toast.error(
 )
 
 
-
 }
-
 
 
 finally{
@@ -553,9 +557,7 @@ finally{
 setSendingOtp(false)
 
 
-
 }
-
 
 
 }

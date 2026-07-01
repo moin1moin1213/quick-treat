@@ -396,15 +396,11 @@ return number
 
 
 
-const sendOTP=async()=>{
-
+const sendOTP = async()=>{
 
 
 const phone =
 getValues('phone')
-
-
-
 
 
 
@@ -415,9 +411,9 @@ formatPhone(phone)
 
 
 
-
 if(
-!phoneNumber.startsWith('8801')
+!phoneNumber.startsWith('8801') ||
+phoneNumber.length !== 13
 ){
 
 
@@ -435,6 +431,8 @@ return
 
 
 
+try{
+
 
 setOtpLoading(true)
 
@@ -443,24 +441,15 @@ setOtpLoading(true)
 
 
 
-
-try{
-
-
-
-const response =
-await fetch(
+const response = await fetch(
 
 '/api/send-otp',
 
 {
 
-
 method:'POST',
 
-
 headers:{
-
 
 'Content-Type':
 'application/json'
@@ -491,13 +480,35 @@ await response.json()
 
 
 
+// DEBUG
+console.log(
+"OTP STATUS:",
+response.status
+)
+
+
+console.log(
+"OTP RESPONSE:",
+result
+)
+
+
+
+
+
+
 
 if(!response.ok){
 
 
 throw new Error(
+
 result.error ||
+
+result.message ||
+
 'OTP failed'
+
 )
 
 
@@ -508,7 +519,7 @@ result.error ||
 
 
 
-
+// OTP SENT SUCCESS
 
 setOtpSent(true)
 
@@ -522,13 +533,9 @@ setResendTime(60)
 
 
 
-
-
-
 toast.success(
 'OTP sent successfully'
 )
-
 
 
 
@@ -538,18 +545,30 @@ toast.success(
 catch(error){
 
 
-
-console.error(error)
-
-
-
-toast.error(
-'OTP send failed'
+console.error(
+"OTP ERROR:",
+error
 )
 
 
 
+toast.error(
+
+error instanceof Error
+
+?
+
+error.message
+
+:
+
+'OTP send failed'
+
+)
+
+
 }
+
 
 finally{
 
@@ -561,18 +580,6 @@ setOtpLoading(false)
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
 // =======================
 // VERIFY OTP
 // =======================

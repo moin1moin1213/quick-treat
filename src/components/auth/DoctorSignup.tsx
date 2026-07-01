@@ -300,7 +300,9 @@ useState(false)
 const [generatedOtp,setGeneratedOtp]=
 useState('')
 
+const [,setResendTime] = useState(0)
 
+const [,setVerifiedPhone] = useState('')
 
 
 
@@ -396,14 +398,11 @@ return number
 
 
 
-const sendOTP=async()=>{
-
+const sendOTP = async()=>{
 
 
 const phone =
 getValues('phone')
-
-
 
 
 
@@ -423,8 +422,6 @@ return
 
 
 
-
-
 const phoneNumber =
 formatPhoneNumber(phone)
 
@@ -432,8 +429,10 @@ formatPhoneNumber(phone)
 
 
 
-
-if(!phoneNumber.startsWith('8801')){
+if(
+!phoneNumber.startsWith('8801') ||
+phoneNumber.length !== 13
+){
 
 
 toast.error(
@@ -450,6 +449,7 @@ return
 
 
 
+try{
 
 
 setOtpLoading(true)
@@ -458,20 +458,11 @@ setOtpLoading(true)
 
 
 
-
-
-try{
-
-
-
 const otpCode =
 Math.floor(
-100000+
-Math.random()*900000
-)
-.toString()
-
-
+100000 +
+Math.random() * 900000
+).toString()
 
 
 
@@ -479,32 +470,27 @@ Math.random()*900000
 
 const response =
 await fetch(
-'/api/send-otp',
-{
 
+'/api/send-otp',
+
+{
 
 method:'POST',
 
 
 headers:{
 
-
 'Content-Type':
 'application/json'
-
 
 },
 
 
-
 body:JSON.stringify({
-
 
 phone:phoneNumber,
 
-
 otp:otpCode
-
 
 })
 
@@ -519,8 +505,6 @@ otp:otpCode
 
 
 
-
-
 const result =
 await response.json()
 
@@ -528,15 +512,39 @@ await response.json()
 
 
 
+console.log(
+"OTP STATUS:",
+response.status
+)
+
+
+console.log(
+"OTP RESULT:",
+result
+)
 
 
 
-if(!response.ok){
+
+
+
+
+// API success check
+
+if(
+!response.ok ||
+result.success === false
+){
 
 
 throw new Error(
+
 result.error ||
+
+result.message ||
+
 'OTP failed'
+
 )
 
 
@@ -558,6 +566,16 @@ setOtpSent(true)
 
 
 
+setVerifiedPhone(
+phoneNumber
+)
+
+
+
+setResendTime(60)
+
+
+
 
 
 
@@ -569,22 +587,37 @@ toast.success(
 
 
 
-
-
 }
 
 catch(error){
 
 
-console.error(error)
+
+console.error(
+"OTP SEND ERROR:",
+error
+)
+
 
 
 toast.error(
+
+error instanceof Error
+
+?
+
+error.message
+
+:
+
 'OTP send failed'
+
 )
 
 
 }
+
+
 
 finally{
 
@@ -597,17 +630,6 @@ setOtpLoading(false)
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
 // =======================
 // VERIFY OTP
 // =======================
