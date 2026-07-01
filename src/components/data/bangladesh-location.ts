@@ -200,8 +200,8 @@ export const districts: District[] = [
       "Nagarpur",
       "Sakhipur",
       "Tangail Sadar"
-    ]
-  }
+    ],
+  },
 
 // Chattogram Division
 
@@ -391,8 +391,8 @@ export const districts: District[] = [
     "Nannerchar",
     "Rajasthali",
     "Rangamati Sadar"
-  ]
-}
+  ],
+},
 // Rajshahi Division
 
 
